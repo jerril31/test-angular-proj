@@ -1,0 +1,37 @@
+::ng-deep .p-datatable-table {
+  font-family: Verdana, Helvetica;
+}
+
+::ng-deep .p-button {
+  background-color: #002a50;
+  border: #28639e;
+}
+
+::ng-deep .p-fileupload .p-button:hover {
+  background-color: #7399c6;
+}
+
+::ng-deep .p-component {
+  font-family: Verdana, Helvetica;
+}
+
+::ng-deep .p-fileupload .p-fileupload-row {
+  font-size: 13px;
+  height: 3rem;
+}
+
+::ng-deep .p-fileupload .p-fileupload-row div:first-child {
+  display: none;
+}
+::ng-deep .p-fileupload .p-fileupload-row .p-fileupload-filename {
+  width: 300px;
+}
+
+::ng-deep .p-fileupload .p-fileupload-row .p-button {
+  height: 2rem;
+  width: 2rem;
+}
+
+::ng-deep .p-fileupload .p-progressbar .p-progressbar-value {
+  background-color: #002a50;
+}

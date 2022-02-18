@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "pdf-pw-remover-test4": {
+    "pdf-pw-remover": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:application": {
@@ -17,17 +17,17 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/pdf-pw-remover-test4",
+            "outputPath": "dist/pdf-pw-remover",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "node_modules/primeicons/primeicons.css",
+              "node_modules/primeng/resources/themes/lara-light-indigo/theme.css",
+              "node_modules/primeng/resources/primeng.min.css"
             ],
             "scripts": []
           },
@@ -68,10 +68,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "pdf-pw-remover-test4:build:production"
+              "browserTarget": "pdf-pw-remover:build:production"
             },
             "development": {
-              "browserTarget": "pdf-pw-remover-test4:build:development"
+              "browserTarget": "pdf-pw-remover:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -79,7 +79,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "pdf-pw-remover-test4:build"
+            "browserTarget": "pdf-pw-remover:build"
           }
         },
         "test": {
@@ -89,18 +89,13 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.css"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
+            "styles": ["src/styles.css"],
             "scripts": []
           }
         }
       }
     }
   },
-  "defaultProject": "pdf-pw-remover-test4"
+  "defaultProject": "pdf-pw-remover"
 }

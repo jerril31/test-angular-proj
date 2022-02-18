@@ -1,0 +1,17 @@
+.loading {
+  position: fixed;
+  z-index: 1150;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  opacity: 0.6;
+  top: 0;
+}
+
+.loading img {
+  /* background-color: #e8f2ff; */
+  position: absolute;
+  top: 40%;
+  left: 47%;
+}

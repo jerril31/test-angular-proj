@@ -1,0 +1,48 @@
+<!--<p-fileUpload name="myfile[]" method="put" url="https://fm4ym65zn0.execute-api.ap-southeast-1.amazonaws.com/dev/my-test-bucket-jerril/sample-pdf.pdf"  accept=".pdf" [multiple]="true" [previewWidth]="0"></p-fileUpload>-->
+<!--<p-fileUpload name="docs[]" [multiple]="true" accept="image/*" [maxFileSize]="2000000" [showUploadButton]="true"
+  [showCancelButton]="true"> </p-fileUpload>-->
+<!--<p-fileUpload name="myfile[]" [multiple]="true" [customUpload]="true" (uploadHandler)="onUpload($event)"></p-fileUpload>-->
+
+<!-- <p-fileUpload name="myfile[]"    styleClass="testStyle" [multiple]="true"   accept=".pdf" url="https://fm4ym65zn0.execute-api.ap-southeast-1.amazonaws.com/dev/my-test-bucket-jerril/sample-pdf3.pdf" [maxFileSize]="1000000">
+    <ng-template let-file pTemplate="file">
+      <div>{{file.name}}</div>
+    </ng-template> -->
+<!--</p-fileUpload> -->
+<p-messages></p-messages>
+<div class="upload-main-div">
+  <div class="file-upload-div">
+    <div class="nav-area-div">
+      <button
+        type="button"
+        pButton
+        *ngIf="showViewResultButton"
+        (click)="goToResultsPage()"
+        label="View Processed File(s)"
+        icon="pi pi-arrow-right"
+        iconPos="right"
+      ></button>
+    </div>
+    <br />
+    <div>
+      <h4>
+        <i class="pi pi-exclamation-circle">&nbsp;</i>Maximum Allowed File Size:
+        20 MB
+      </h4>
+    </div>
+    <div>
+      <p-fileUpload
+        name="myfile[]"
+        accept=".pdf"
+        [multiple]="true"
+        [customUpload]="true"
+        (uploadHandler)="onUpload($event)"
+        (onClear)="clearAll()"
+        cancelLabel="Clear All"
+        chooseLabel="Choose File(s)"
+        [fileLimit]="10"
+        [maxFileSize]="20000000"
+      >
+      </p-fileUpload>
+    </div>
+  </div>
+</div>

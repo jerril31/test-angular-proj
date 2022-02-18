@@ -25,7 +25,7 @@ module.exports = function (config) {
       suppressAll: true // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage/pdf-pw-remover-test4'),
+      dir: require('path').join(__dirname, './coverage/pdf-pw-remover'),
       subdir: '.',
       reporters: [
         { type: 'html' },

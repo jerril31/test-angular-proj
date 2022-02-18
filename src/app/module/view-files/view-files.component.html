@@ -1,0 +1,95 @@
+<p-messages></p-messages>
+<div class="view-main-div">
+  <div class="buttonArea">
+    <button
+      pButton
+      type="button"
+      label="Back to Upload Page"
+      routerLink="/upload"
+      icon="pi pi-arrow-left"
+      iconPos="left"
+    ></button>
+
+    <button
+      pButton
+      type="button"
+      label="Refresh"
+      (click)="refresh()"
+      icon="pi pi-refresh"
+      iconPos="left"
+    ></button>
+  </div>
+  <div class="note-div">
+    <h4>
+      <div class="pi pi-exclamation-triangle"></div>
+      Important note: Some files might take time to be processed. If the file
+      you uploaded doesn't appear on either of the lists below, kindly hit
+      refresh after some time.
+    </h4>
+  </div>
+  <div class="divContainer">
+    <h2>
+      <i class="pi pi-check-circle converted-file-icon">&nbsp;</i>
+      <span>Successfully Processed Files</span>
+    </h2>
+    <p-table [value]="fileList" responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="row-head-name">File Name</th>
+          <th class="row-head">Size</th>
+          <th class="row-head">Last Updated</th>
+          <th class="row-head">Download</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-fileItem>
+        <tr>
+          <td class="row-cell-content-filename">{{ fileItem.fileName }}</td>
+          <td class="row-cell-content">{{ fileItem.fileSize | filesize }}</td>
+          <td class="row-cell-content">
+            {{ fileItem.lastUpdated | date: "yyyy-MM-dd HH:mm:ss z" }}
+          </td>
+          <td class="row-cell-content">
+            <i
+              class="pi pi-download download-link"
+              (click)="downloadFile(fileItem.location, fileItem.fileKey)"
+            ></i>
+          </td>
+          <!-- <td><a target='_self' href="https://fm4ym65zn0.execute-api.ap-southeast-1.amazonaws.com/dev/my-test-bucket-jerril/sample-pic3.jpeg" download>Download</a></td> -->
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <div class="divContainer">
+    <h2>
+      <i class="pi pi-times-circle error-file-icon">&nbsp;</i
+      ><span>Files with Error</span>
+    </h2>
+    <p-table [value]="errorFileList" responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="row-head-name">File Name</th>
+          <th class="row-head">Size</th>
+          <th class="row-head">Last Updated</th>
+          <th class="row-head">Download</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-fileItem>
+        <tr>
+          <td class="row-cell-content-filename">{{ fileItem.fileName }}</td>
+          <td class="row-cell-content">
+            {{ fileItem.fileSize | filesize }}
+          </td>
+          <td class="row-cell-content">
+            {{ fileItem.lastUpdated | date: "yyyy-MM-dd HH:mm:ss z" }}
+          </td>
+          <td class="row-cell-content">
+            <i
+              class="pi pi-download download-link"
+              (click)="downloadFile(fileItem.location, fileItem.fileKey)"
+            ></i>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

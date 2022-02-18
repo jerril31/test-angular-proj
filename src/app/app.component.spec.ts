@@ -20,16 +20,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'pdf-pw-remover-test4'`, () => {
+  it(`should have as title 'pdf-pw-remover'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('pdf-pw-remover-test4');
+    expect(app.title).toEqual('pdf-pw-remover');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('pdf-pw-remover-test4 app is running!');
+    expect(compiled.querySelector('.content span')?.textContent).toContain('pdf-pw-remover app is running!');
   });
 });

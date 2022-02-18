@@ -1,0 +1,19 @@
+.p-button:hover {
+  background-color: #7399c6;
+}
+.p-button {
+  margin-bottom: 2rem;
+}
+
+.upload-main-div {
+  margin: 0 10rem 0 10rem;
+  position: relative;
+}
+
+.file-upload-div {
+  margin-top: 5rem;
+}
+.nav-area-div {
+  position: absolute;
+  right: 0;
+}

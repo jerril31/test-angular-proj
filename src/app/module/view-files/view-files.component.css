@@ -1,0 +1,62 @@
+::ng-deep .p-button {
+  margin-right: 0.5rem;
+}
+
+.buttonArea .p-button:hover {
+  background-color: #7399c6;
+}
+
+.view-main-div {
+  margin: 0 10rem 0 10rem;
+}
+
+.download-link {
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #7399c6;
+}
+
+.converted-file-icon {
+  color: #8aa349;
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.error-file-icon {
+  color: #cc3d30;
+  font-weight: bold;
+  font-size: 1.7rem;
+}
+
+.divContainer {
+  margin: 3rem 0 3rem 0;
+}
+
+.buttonArea {
+  margin: 3rem 0 3rem 0;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody .row-cell-content {
+  text-align: center;
+}
+::ng-deep .p-datatable .p-datatable-thead .row-head {
+  text-align: center;
+  width: 250px;
+}
+
+::ng-deep .p-datatable .p-datatable-thead .row-head-name {
+  width: 500px;
+}
+
+.note-div {
+  color: red;
+  font-size: 16px;
+}
+
+::ng-deep .note-div .pi-exclamation-triangle {
+  font-size: 16px;
+}
+
+.row-cell-content-filename {
+  font-weight: bold;
+}
