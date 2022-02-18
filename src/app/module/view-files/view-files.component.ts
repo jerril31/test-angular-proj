@@ -129,36 +129,4 @@ export class ViewFilesComponent implements OnInit {
       detail: `Error occured while retrieving ${filesType}. Error: ${erroMsg}.`,
     });
   }
-
-  // private retrieveConvertedFiles(): void {
-  //   this.pdfPwRemoverService.retrieveConvertedFiles().subscribe((data) => {
-  //     console.log(data);
-
-  //     const parser = new xml2js.Parser({ strict: false, trim: true });
-  //     parser.parseString(data, (err: any, result: any) => {
-  //       let s3Result = result as S3Result;
-  //       console.log(s3Result.LISTBUCKETRESULT.CONTENTS);
-
-  //       for (let content of s3Result.LISTBUCKETRESULT.CONTENTS) {
-  //         console.log(content.KEY);
-  //         var fileDetails = {
-  //           fileName: content.KEY,
-  //           fileSize: content.SIZE,
-  //         } as FileDetails;
-  //         this.fileList.push(fileDetails);
-  //       }
-  //       console.log(this.fileList);
-  //     });
-
-  //     //this.fileList = fileList;
-  //   });
-  // }
-
-  // private retrieveErrorFiles(): void {
-  //   this._loaderSvc.show();
-  //   this.pdfPwRemoverService.retrieveErrorFiles().subscribe((errorFileList) => {
-  //     console.log(errorFileList);
-  //     this.errorFileList = errorFileList;
-  //   });
-  // }
 }
