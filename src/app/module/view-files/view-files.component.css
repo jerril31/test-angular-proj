@@ -49,8 +49,11 @@
 }
 
 .note-div {
-  color: red;
   font-size: 16px;
+}
+
+.imp-note-span {
+  color: red;
 }
 
 ::ng-deep .note-div .pi-exclamation-triangle {

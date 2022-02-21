@@ -16,7 +16,6 @@ import { PdfPwRemoverService } from 'src/app/service/pdf-pw-remover.service';
 export class UploadFilesComponent implements OnInit {
   uploadedFiles: any[] = [];
   showViewResultButton: boolean = true;
-  env: string = 'dev';
   constructor(
     private router: Router,
     private pdfPwRemoverService: PdfPwRemoverService,

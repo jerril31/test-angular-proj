@@ -60,6 +60,22 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
+            },
+            "dev": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.dev.ts"
+                }
+              ]
+            },
+            "int": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.int.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -72,6 +88,12 @@
             },
             "development": {
               "browserTarget": "pdf-pw-remover:build:development"
+            },
+            "dev": {
+              "browserTarget": "pdf-pw-remover:build:dev"
+            },
+            "int": {
+              "browserTarget": "pdf-pw-remover:build:int"
             }
           },
           "defaultConfiguration": "development"
