@@ -161,11 +161,11 @@ export class PdfPwRemoverService {
     //   );
     // }
     const headers = new HttpHeaders();
-    headers.append(' Access-Control-Allow-Headers', 'Content-Type');
-    headers.append('Content-Type', 'application/pdf');
-    headers.append('content-type', 'application/pdf');
-    headers.append('Accept', 'application/pdf');
-    headers.append('access-control-allow-methods', 'GET, POST, OPTIONS, PUT');
+    // headers.append(' Access-Control-Allow-Headers', 'Content-Type');
+    // headers.append('Content-Type', 'application/pdf');
+    // headers.append('content-type', 'application/pdf');
+    // headers.append('Accept', 'application/pdf');
+    // headers.append('access-control-allow-methods', 'GET, POST, OPTIONS, PUT');
     const requestOptions: Object = {
       headers: headers,
     };
@@ -181,8 +181,9 @@ export class PdfPwRemoverService {
   }
 
   retrieveFile(location: string, fileName: string): Observable<any> {
-    const headers = new HttpHeaders();
-    headers.set('accept', '*/*');
+    const headers = new HttpHeaders().set('accept', 'application/pdf');
+    // .set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT')
+    // .set('Access-Control-Allow-Origin', '*');
     const requestOptions: Object = {
       headers: headers,
     };

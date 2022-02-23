@@ -37,16 +37,15 @@ export class ViewFilesComponent implements OnInit {
     this.retrieveAllFiles();
   }
 
-  downloadFile(location: string, fileName: string) {
+  downloadFile(location: string, fileS3Key: string, fileName: string) {
     this._loaderSvc.show();
     this.messageService.clear();
     this.pdfPwRemoverService
-      .retrieveFile(location, fileName)
+      .retrieveFile(location, fileS3Key)
       .subscribe({
         next: (data) => {
-          console.log('here');
           console.log(data);
-          saveAs(data, fileName);
+          saveAs(data, fileS3Key);
         },
         error: (error) => {
           this.messageService.add({

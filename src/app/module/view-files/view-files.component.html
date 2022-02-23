@@ -55,7 +55,13 @@
           <td class="row-cell-content">
             <i
               class="pi pi-download download-link"
-              (click)="downloadFile(fileItem.location, fileItem.fileKey)"
+              (click)="
+                downloadFile(
+                  fileItem.location,
+                  fileItem.fileKey,
+                  fileItem.fileName
+                )
+              "
             ></i>
           </td>
           <!-- <td><a target='_self' href="https://fm4ym65zn0.execute-api.ap-southeast-1.amazonaws.com/dev/my-test-bucket-jerril/sample-pic3.jpeg" download>Download</a></td> -->
@@ -89,7 +95,13 @@
           <td class="row-cell-content">
             <i
               class="pi pi-download download-link"
-              (click)="downloadFile(fileItem.location, fileItem.fileKey)"
+              (click)="
+                downloadFile(
+                  fileItem.location,
+                  fileItem.fileKey,
+                  fileItem.fileName
+                )
+              "
             ></i>
           </td>
         </tr>

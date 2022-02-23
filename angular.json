@@ -76,6 +76,20 @@
                   "with": "src/environments/environment.int.ts"
                 }
               ]
+            },
+            "lcl": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.lcl.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -94,6 +108,9 @@
             },
             "int": {
               "browserTarget": "pdf-pw-remover:build:int"
+            },
+            "lcl": {
+              "browserTarget": "pdf-pw-remover:build:lcl"
             }
           },
           "defaultConfiguration": "development"
