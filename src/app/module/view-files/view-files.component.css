@@ -1,3 +1,8 @@
+::ng-deep .p-datatable-table {
+  font-family: Verdana, Helvetica;
+  /*font-size: 12px;*/
+}
+
 ::ng-deep .p-button {
   margin-right: 0.5rem;
 }
@@ -59,6 +64,16 @@
 ::ng-deep .note-div .pi-exclamation-triangle {
   font-size: 16px;
 }
+/** Uncomment during clean-up**/
+/* ::ng-deep .p-datatable .p-datatable-thead tr th {
+  background-color: #afdbfd;
+  color: #002a50;
+  text-align: center;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody tr:nth-child(even) {
+  background-color: #ddeaf7;
+} */
 
 .row-cell-content-filename {
   font-weight: bold;

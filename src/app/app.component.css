@@ -1,10 +1,10 @@
-::ng-deep .p-datatable-table {
-  font-family: Verdana, Helvetica;
-}
-
 ::ng-deep .p-button {
   background-color: #002a50;
   border: #28639e;
+}
+
+::ng-deep .upload-main-div {
+  min-width: 660px;
 }
 
 ::ng-deep .p-fileupload .p-button:hover {
@@ -18,13 +18,20 @@
 ::ng-deep .p-fileupload .p-fileupload-row {
   font-size: 13px;
   height: 3rem;
+  border-bottom: 1px solid #eef3f5;
+}
+
+::ng-deep .p-fileupload-files {
+  border-top: 1px solid #eef3f5;
 }
 
 ::ng-deep .p-fileupload .p-fileupload-row div:first-child {
   display: none;
 }
 ::ng-deep .p-fileupload .p-fileupload-row .p-fileupload-filename {
-  width: 300px;
+  width: 50%;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 ::ng-deep .p-fileupload .p-fileupload-row .p-button {

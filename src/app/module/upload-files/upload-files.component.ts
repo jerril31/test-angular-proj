@@ -101,7 +101,7 @@ export class UploadFilesComponent implements OnInit {
           setTimeout(() => {
             this._loaderSvc.hide();
             this.router.navigate([AppConstant.URL_VIEW_CONVERTED_FILES]);
-          }, 30000);
+          }, 20000);
         } else {
           this._loaderSvc.hide();
         }
@@ -130,7 +130,7 @@ export class UploadFilesComponent implements OnInit {
 
   clearAll() {
     this.messageService.clear();
-    this.showViewResultButton = false;
+    //this.showViewResultButton = false;
   }
 
   goToResultsPage() {
