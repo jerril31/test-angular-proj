@@ -3,9 +3,18 @@ import {
   HttpClient,
   HttpErrorResponse,
   HttpHeaders,
+  HttpParams,
   HttpResponse,
 } from '@angular/common/http';
-import { catchError, forkJoin, map, Observable, of, throwError } from 'rxjs';
+import {
+  catchError,
+  forkJoin,
+  map,
+  Observable,
+  of,
+  subscribeOn,
+  throwError,
+} from 'rxjs';
 import { ApiConstant } from '../constant/api.constant';
 import { AppConstant } from '../constant/app.constant';
 import { environment } from 'src/environments/environment';
@@ -15,6 +24,7 @@ import {
   S3Result,
 } from '../model/pdf-pw-remover-file';
 import * as xml2js from 'xml2js';
+import { concatMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -121,31 +131,25 @@ export class PdfPwRemoverService {
   //   );
   // }
 
-  // uploadFiles(files: Array<File>): Observable<any> {
-  //   // return of(fileList);
-  //   var formData = new FormData();
-  //   for (let file of files) {
-  //     formData.append('files', file);
-  //   }
-  //   console.log('Processing uploa2d..');
-  //   //return of("Upload complete.");
-  //   const headers = new HttpHeaders();
-  //   headers.append(' Access-Control-Allow-Headers', 'Content-Type');
-  //   headers.append('Content-Type', 'multipart/form-data');
-  //   headers.append('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT');
-  //   headers.append('Access-Control-Allow-Origin', '*');
-  //   const requestOptions: Object = {
-  //     headers: headers,
-  //     responseType: 'text',
-  //   };
-  //   return this.http.post<String>(
-  //     `${ApiConstant.URL_AWS_API_GATEWAY_BASE}${ApiConstant.URL_UPLOAD_PDF_FILES}`,
-  //     formData,
-  //     requestOptions
-  //   );
-
-  //   //return this.http.put<String>('https://fm4ym65zn0.execute-api.ap-southeast-1.amazonaws.com/dev/my-test-bucket-jerril/sample-pdf3.pdf',formData,requestOptions);
-  // }
+  uploadFileViaPresignedUrl(file: File): Observable<any> {
+    const headers = new HttpHeaders();
+    const requestOptions: Object = {
+      headers: headers,
+    };
+    console.log('Uploading via presignedURL..');
+    //TODO: API Gateway 500 and 400 response
+    return this.http
+      .get(
+        `${environment.awsApiGwS3BaseUrl}s3/${environment.uploadedFilesBucket}/${file.name}`,
+        { params: new HttpParams().set('method', 'PUT') }
+      )
+      .pipe(
+        concatMap((res: any) => {
+          console.log(res);
+          return this.http.put(res.presignedUrl, file, requestOptions);
+        })
+      );
+  }
 
   uploadFile(file: File): Observable<any> {
     // if (file.name === 'sample123.pdf') {
@@ -200,6 +204,39 @@ export class PdfPwRemoverService {
         map((res) => {
           console.log(res);
           return new Blob([res], { type: 'application/pdf' });
+        })
+      );
+  }
+
+  retrieveFileViaPresignedUrl(
+    location: string,
+    fileName: string
+  ): Observable<any> {
+    const headers = new HttpHeaders().set('accept', 'application/pdf');
+    const requestOptions: Object = {
+      headers: headers,
+    };
+    let encodedFilename = encodeURIComponent(fileName);
+    //Get presigned URL for Download and then make a call on the presigned URL
+    return this.http
+      .get(
+        `${environment.awsApiGwS3BaseUrl}s3/${environment.convertedFilesBucket}/${encodedFilename}`,
+        { params: new HttpParams().set('method', 'GET') }
+      )
+      .pipe(
+        concatMap((res: any) => {
+          console.log(res);
+          return this.http
+            .get(res.presignedUrl, {
+              headers: headers,
+              responseType: 'blob',
+            })
+            .pipe(
+              map((res) => {
+                console.log(res);
+                return new Blob([res], { type: 'application/pdf' });
+              })
+            );
         })
       );
   }

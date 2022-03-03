@@ -41,7 +41,8 @@ export class ViewFilesComponent implements OnInit {
     this._loaderSvc.show();
     this.messageService.clear();
     this.pdfPwRemoverService
-      .retrieveFile(location, fileS3Key)
+      // .retrieveFile(location, fileS3Key)
+      .retrieveFileViaPresignedUrl(location, fileS3Key)
       .subscribe({
         next: (data) => {
           console.log(data);

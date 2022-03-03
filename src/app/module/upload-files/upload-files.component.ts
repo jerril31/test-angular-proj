@@ -7,6 +7,8 @@ import { AppConstant } from 'src/app/constant/app.constant';
 import { LoaderService } from 'src/app/layout/loader/loader.service';
 import { PdfPwRemoverService } from 'src/app/service/pdf-pw-remover.service';
 
+import { environment } from 'src/environments/environment';
+
 @Component({
   selector: 'app-upload-files',
   templateUrl: './upload-files.component.html',
@@ -35,32 +37,21 @@ export class UploadFilesComponent implements OnInit {
       let fileName = file.name;
       //uploadResults$.push(this.pdfPwRemoverService.uploadFile(file));
       uploads$.push(
-        this.pdfPwRemoverService.uploadFile(file).pipe(
-          map(
-            (data: any) => this.handleSuccessUpload(data, fileName)
-            // console.log(data);
-            // this.messageService.add({
-            //   severity: 'success',
-            //   summary: 'Upload Success',
-            //   detail: `File ${fileName} successfully uploaded.`,
-            // });
-            // return { isError: false, response: data };
-          ),
+        // this.pdfPwRemoverService.uploadFile(file).pipe(
+        //   map((data: any) => this.handleSuccessUpload(data, fileName)),
+        //   catchError((err) => this.handleErrorUpload(err, fileName))
+        // )
+        this.pdfPwRemoverService.uploadFileViaPresignedUrl(file).pipe(
+          map((data: any) => this.handleSuccessUpload(data, fileName)),
           catchError((err) => this.handleErrorUpload(err, fileName))
-          //{
-          // console.log(err);
-          // this.messageService.add({
-          //   severity: 'error',
-          //   summary: `Upload Failed`,
-          //   detail: `Error occured while uploading ${fileName}. Error:${err.message}.`,
-          // });
-          // return of({ isError: true, response: err });
-          //})
         )
       );
     }
 
     this.processAllUploadsuploads(uploads$);
+    // for (let file of event.files) {
+    //   this.uploadViaSdK(file);
+    // }
   }
   private processAllUploadsuploads(uploads$: Observable<any>[]) {
     //Wait for all uploads to emit.
@@ -136,4 +127,39 @@ export class UploadFilesComponent implements OnInit {
   goToResultsPage() {
     this.router.navigate([AppConstant.URL_VIEW_CONVERTED_FILES]);
   }
+
+  // uploadViaSdK = async (file: File) => {
+  //   console.log('Test here');
+  //   let bucketParams = {
+  //     Bucket: environment.uploadedFilesBucket,
+  //     Key: file.name,
+  //     Body: file,
+  //     ContentType: file.type,
+  //   };
+  //   // Set the AWS Region.
+  //   const REGION = 'us-east-1'; //e.g. "us-east-1"
+  //   // Create an Amazon S3 service client object.
+  //   const s3Client = new S3Client({ region: REGION });
+  //   var AWS = require('aws-sdk');
+  //   AWS.config.getCredentials(function (err: any) {
+  //     if (err) {
+  //       console.log(err.stack);
+  //     } else {
+  //       console.log(AWS.config.credentials.accessKeyId);
+  //     }
+  //   });
+  //   try {
+  //     const data = await s3Client.send(new PutObjectCommand(bucketParams));
+  //     console.log(
+  //       'Successfully uploaded object: ' +
+  //         bucketParams.Bucket +
+  //         '/' +
+  //         bucketParams.Key
+  //     );
+  //     return data; // For unit tests.
+  //   } catch (err) {
+  //     console.log('Error', err);
+  //     return 'error';
+  //   }
+  // };
 }
