@@ -16,8 +16,10 @@ import { environment } from 'src/environments/environment';
   providers: [MessageService],
 })
 export class UploadFilesComponent implements OnInit {
-  uploadedFiles: any[] = [];
+  //uploadedFiles: any[] = [];
   showViewResultButton: boolean = true;
+  maxFileSize: number = 500000000; //Max file size allowed for upload
+
   constructor(
     private router: Router,
     private pdfPwRemoverService: PdfPwRemoverService,
@@ -35,23 +37,17 @@ export class UploadFilesComponent implements OnInit {
     for (let file of event.files) {
       console.log(file.name);
       let fileName = file.name;
-      //uploadResults$.push(this.pdfPwRemoverService.uploadFile(file));
+      console.log('File Size: ' + file.size);
       uploads$.push(
-        // this.pdfPwRemoverService.uploadFile(file).pipe(
-        //   map((data: any) => this.handleSuccessUpload(data, fileName)),
-        //   catchError((err) => this.handleErrorUpload(err, fileName))
-        // )
+        //We will use presigned URL approach in uploading to S3 bucket since API Gateway has 10MB payload limit
         this.pdfPwRemoverService.uploadFileViaPresignedUrl(file).pipe(
           map((data: any) => this.handleSuccessUpload(data, fileName)),
           catchError((err) => this.handleErrorUpload(err, fileName))
         )
       );
     }
-
+    //Subscribe to all observables
     this.processAllUploadsuploads(uploads$);
-    // for (let file of event.files) {
-    //   this.uploadViaSdK(file);
-    // }
   }
   private processAllUploadsuploads(uploads$: Observable<any>[]) {
     //Wait for all uploads to emit.
@@ -100,7 +96,6 @@ export class UploadFilesComponent implements OnInit {
   }
 
   private handleSuccessUpload(data: any, fileName: any) {
-    console.log(data);
     this.messageService.add({
       severity: 'success',
       summary: 'Upload Success',

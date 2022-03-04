@@ -64,6 +64,19 @@
 ::ng-deep .note-div .pi-exclamation-triangle {
   font-size: 16px;
 }
+
+::ng-deep .p-datatable .p-sortable-column.p-highlight {
+  color: #343a40;
+  background-color: #f8f9fa;
+}
+::ng-deep .p-datatable .p-sortable-column.p-highlight:hover {
+  color: #343a40;
+  background-color: #f8f9fa;
+}
+
+::ng-deep .p-datatable .p-sortable-column:focus {
+  box-shadow: none;
+}
 /** Uncomment during clean-up**/
 /* ::ng-deep .p-datatable .p-datatable-thead tr th {
   background-color: #afdbfd;

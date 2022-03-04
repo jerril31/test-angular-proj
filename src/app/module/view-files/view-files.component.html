@@ -36,12 +36,17 @@
       <i class="pi pi-check-circle converted-file-icon">&nbsp;</i>
       <span>Successfully Processed Files</span>
     </h2>
-    <p-table [value]="fileList" responsiveLayout="scroll">
+    <p-table
+      [value]="fileList"
+      responsiveLayout="scroll"
+      sortField="lastUpdated"
+      [sortOrder]="-1"
+    >
       <ng-template pTemplate="header">
         <tr>
-          <th class="row-head-name">File Name</th>
-          <th class="row-head">Size</th>
-          <th class="row-head">Last Updated</th>
+          <th pSortableColumn="fileName" class="row-head-name">File Name</th>
+          <th pSortableColumn="fileSize" class="row-head">Size</th>
+          <th pSortableColumn="lastUpdated" class="row-head">Last Updated</th>
           <th class="row-head">Download</th>
         </tr>
       </ng-template>
@@ -77,9 +82,9 @@
     <p-table [value]="errorFileList" responsiveLayout="scroll">
       <ng-template pTemplate="header">
         <tr>
-          <th class="row-head-name">File Name</th>
-          <th class="row-head">Size</th>
-          <th class="row-head">Last Updated</th>
+          <th pSortableColumn="fileName" class="row-head-name">File Name</th>
+          <th pSortableColumn="fileSize" class="row-head">Size</th>
+          <th pSortableColumn="lastUpdated" class="row-head">Last Updated</th>
           <th class="row-head">Download</th>
         </tr>
       </ng-template>

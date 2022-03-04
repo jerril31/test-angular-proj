@@ -64,7 +64,7 @@ export class PdfPwRemoverService {
   }
 
   extractBucketContents(xmlResponseString: String) {
-    console.log(xmlResponseString);
+    //console.log(xmlResponseString);
     let successFileList = new Array<FileDetails>();
     let errorFileList = new Array<FileDetails>();
     let s3Result = this.parseXml(xmlResponseString) as S3Result;
@@ -130,14 +130,19 @@ export class PdfPwRemoverService {
   //     { responseType: 'text' }
   //   );
   // }
-
+  /**
+   * Retrieve Presigned URL for Upload from API Gateway
+   * Using Presigned URL, upload file to S3.
+   *
+   * @param file
+   * @returns
+   */
   uploadFileViaPresignedUrl(file: File): Observable<any> {
     const headers = new HttpHeaders();
     const requestOptions: Object = {
       headers: headers,
     };
     console.log('Uploading via presignedURL..');
-    //TODO: API Gateway 500 and 400 response
     return this.http
       .get(
         `${environment.awsApiGwS3BaseUrl}s3/${environment.uploadedFilesBucket}/${file.name}`,
@@ -152,18 +157,7 @@ export class PdfPwRemoverService {
   }
 
   uploadFile(file: File): Observable<any> {
-    // if (file.name === 'sample123.pdf') {
-    //   return this.http.put(
-    //     `${ApiConstant.URL_AWS_API_GATEWAY_BASE}${ApiConstant.URL_PATH_UPLOADED_FILES_BUCKET}/${file.name}`,
-    //     file
-    //   );
-    //   //return of('Success');
-    // } else {
-    //   return this.http.put(
-    //     `https://inw9635js9.execute-api.ap-southeast-1.amazonaws.com/dev/${ApiConstant.URL_PATH_UPLOADED_FILES_BUCKET}X/${file.name}`,
-    //     file
-    //   );
-    // }
+    console.log('Uploading via API Gateway..');
     const headers = new HttpHeaders();
     // headers.append(' Access-Control-Allow-Headers', 'Content-Type');
     // headers.append('Content-Type', 'application/pdf');
@@ -186,17 +180,12 @@ export class PdfPwRemoverService {
 
   retrieveFile(location: string, fileName: string): Observable<any> {
     const headers = new HttpHeaders().set('accept', 'application/pdf');
-    // .set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT')
-    // .set('Access-Control-Allow-Origin', '*');
     const requestOptions: Object = {
       headers: headers,
     };
     let encodedFilename = encodeURIComponent(fileName);
     return this.http
       .get(`${environment.awsApiGwS3BaseUrl}${location}/${encodedFilename}`, {
-        // //.get(
-        //   `${ApiConstant.URL_AWS_API_GATEWAY_BASE}${location}/testerror1.pdf`,
-        //  {
         headers: headers,
         responseType: 'blob',
       })
@@ -208,6 +197,13 @@ export class PdfPwRemoverService {
       );
   }
 
+  /**
+   * Retrieve Presigned URL for Upload from API Gateway
+   * Using Presigned URL, download file from S3.
+   * @param location
+   * @param fileName
+   * @returns
+   */
   retrieveFileViaPresignedUrl(
     location: string,
     fileName: string
