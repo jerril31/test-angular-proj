@@ -5,24 +5,21 @@ import { UploadFilesComponent } from './module/upload-files/upload-files.compone
 import { ViewFilesComponent } from './module/view-files/view-files.component';
 
 const routes: Routes = [
-  { //View Files
+  {
+    //View Files
     path: AppConstant.URL_VIEW_CONVERTED_FILES,
-    component: ViewFilesComponent
+    component: ViewFilesComponent,
   },
-  { //Upload Files
+  {
+    //Upload Files
     path: AppConstant.URL_UPLOAD_FILES,
-    component: UploadFilesComponent
+    component: UploadFilesComponent,
   },
-  { path: '', 
-    redirectTo: '/upload', 
-    pathMatch: 'full' },
-
+  { path: '', redirectTo: '/upload', pathMatch: 'full' },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { 
-  
-}
+export class AppRoutingModule {}

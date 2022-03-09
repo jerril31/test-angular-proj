@@ -14,12 +14,12 @@
     </div>
     <br />
     <div>
-      <h4>
+      <span class="warning-upload-msg">
         <i class="pi pi-exclamation-circle">&nbsp;</i>Maximum Allowed File Size:
         {{ maxFileSize | filesize }}.
-      </h4>
+      </span>
     </div>
-    <div>
+    <div class="file-upload-area">
       <p-fileUpload
         name="pdfFiles[]"
         accept=".pdf"

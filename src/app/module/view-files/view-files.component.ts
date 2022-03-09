@@ -8,8 +8,8 @@ import {
 import { PdfPwRemoverService } from 'src/app/service/pdf-pw-remover.service';
 import { saveAs } from 'file-saver';
 import { MessageService } from 'primeng/api';
-// declare var require: any;
-// const FileSaver = require('file-saver');
+import { HeaderService } from 'src/app/layout/header/header/header.service';
+import { AppConstant } from 'src/app/constant/app.constant';
 
 @Component({
   selector: 'app-view-files',
@@ -24,10 +24,12 @@ export class ViewFilesComponent implements OnInit {
   constructor(
     private pdfPwRemoverService: PdfPwRemoverService,
     private _loaderSvc: LoaderService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private headerService: HeaderService
   ) {}
 
   ngOnInit(): void {
+    this.headerService.changeTitle(AppConstant.RESULT_SCREEN);
     this.refresh();
   }
 
@@ -93,33 +95,6 @@ export class ViewFilesComponent implements OnInit {
       this.fileList = resultFilesObj.successFiles;
       this.errorFileList = resultFilesObj.errorFiles;
     }
-    // let convertedFileList = responseArray[0];
-    // let errorFileList = responseArray[1];
-    // //Converted Files
-    // if (convertedFileList.isError) {
-    //   console.log(convertedFileList);
-    //   console.log(convertedFileList.data);
-    //   this.addRetrievalErrorMessage(
-    //     'Converted Files',
-    //     convertedFileList.data.message
-    //   );
-    // } else {
-    //   let resultFilesObj = this.pdfPwRemoverService.extractBucketContents(
-    //     convertedFileList.data
-    //   );
-    //   this.fileList = resultFilesObj.successFiles;
-    //   this.errorFileList = resultFilesObj.errorFiles;
-    // }
-    // //Error Files
-    // if (errorFileList.isError) {
-    //   console.log(errorFileList);
-    //   console.log(errorFileList.data);
-    //   this.addRetrievalErrorMessage('Error File', errorFileList.data.message);
-    // } else {
-    //   this.errorFileList = this.pdfPwRemoverService.extractBucketContents(
-    //     errorFileList.data
-    //   );
-    // }
   }
 
   private addRetrievalErrorMessage(filesType: string, erroMsg: any) {

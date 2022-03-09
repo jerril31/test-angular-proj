@@ -20,7 +20,7 @@
     ></button>
   </div>
   <div class="note-div">
-    <h4>
+    <span>
       <span class="imp-note-span"
         ><div class="pi pi-exclamation-triangle"></div>
         Important note: </span
@@ -29,13 +29,13 @@
         doesn't appear on either of the lists below, kindly hit refresh after
         some time.</span
       >
-    </h4>
+    </span>
   </div>
   <div class="divContainer">
-    <h2>
+    <span class="table-label-text">
       <i class="pi pi-check-circle converted-file-icon">&nbsp;</i>
       <span>Successfully Processed Files</span>
-    </h2>
+    </span>
     <p-table
       [value]="fileList"
       responsiveLayout="scroll"
@@ -44,15 +44,18 @@
     >
       <ng-template pTemplate="header">
         <tr>
-          <th pSortableColumn="fileName" class="row-head-name">File Name</th>
-          <th pSortableColumn="fileSize" class="row-head">Size</th>
-          <th pSortableColumn="lastUpdated" class="row-head">Last Updated</th>
-          <th class="row-head">Download</th>
+          <th pSortableColumn="fileName" class="row-head-name">FILE NAME</th>
+          <th pSortableColumn="fileSize" class="row-head">SIZE</th>
+          <th pSortableColumn="lastUpdated" class="row-head">LAST UPDATED</th>
+          <th class="row-head">DOWNLOAD</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-fileItem>
         <tr>
-          <td class="row-cell-content-filename">{{ fileItem.fileName }}</td>
+          <td class="row-cell-content-filename">
+            <div class="pi pi-file-pdf"></div>
+            {{ fileItem.fileName }}
+          </td>
           <td class="row-cell-content">{{ fileItem.fileSize | filesize }}</td>
           <td class="row-cell-content">
             {{ fileItem.lastUpdated | date: "yyyy-MM-dd HH:mm:ss z" }}
@@ -69,28 +72,35 @@
               "
             ></i>
           </td>
-          <!-- <td><a target='_self' href="https://fm4ym65zn0.execute-api.ap-southeast-1.amazonaws.com/dev/my-test-bucket-jerril/sample-pic3.jpeg" download>Download</a></td> -->
         </tr>
       </ng-template>
     </p-table>
   </div>
   <div class="divContainer">
-    <h2>
+    <span class="table-label-text">
       <i class="pi pi-times-circle error-file-icon">&nbsp;</i
       ><span>Files with Error</span>
-    </h2>
-    <p-table [value]="errorFileList" responsiveLayout="scroll">
+    </span>
+    <p-table
+      [value]="errorFileList"
+      responsiveLayout="scroll"
+      sortField="lastUpdated"
+      [sortOrder]="-1"
+    >
       <ng-template pTemplate="header">
         <tr>
-          <th pSortableColumn="fileName" class="row-head-name">File Name</th>
-          <th pSortableColumn="fileSize" class="row-head">Size</th>
-          <th pSortableColumn="lastUpdated" class="row-head">Last Updated</th>
-          <th class="row-head">Download</th>
+          <th pSortableColumn="fileName" class="row-head-name">FILE NAME</th>
+          <th pSortableColumn="fileSize" class="row-head">SIZE</th>
+          <th pSortableColumn="lastUpdated" class="row-head">LAST UPDATED</th>
+          <th class="row-head">DOWNLOAD</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-fileItem>
         <tr>
-          <td class="row-cell-content-filename">{{ fileItem.fileName }}</td>
+          <td class="row-cell-content-filename">
+            <div class="pi pi-file-pdf"></div>
+            {{ fileItem.fileName }}
+          </td>
           <td class="row-cell-content">
             {{ fileItem.fileSize | filesize }}
           </td>

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Message, MessageService } from 'primeng/api';
 import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 import { AppConstant } from 'src/app/constant/app.constant';
+import { HeaderService } from 'src/app/layout/header/header/header.service';
 import { LoaderService } from 'src/app/layout/loader/loader.service';
 import { PdfPwRemoverService } from 'src/app/service/pdf-pw-remover.service';
 
@@ -16,7 +17,6 @@ import { environment } from 'src/environments/environment';
   providers: [MessageService],
 })
 export class UploadFilesComponent implements OnInit {
-  //uploadedFiles: any[] = [];
   showViewResultButton: boolean = true;
   maxFileSize: number = 500000000; //Max file size allowed for upload
 
@@ -24,9 +24,12 @@ export class UploadFilesComponent implements OnInit {
     private router: Router,
     private pdfPwRemoverService: PdfPwRemoverService,
     private _loaderSvc: LoaderService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private headerService: HeaderService
   ) {}
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.headerService.changeTitle(AppConstant.UPLOAD_SCREEN);
+  }
   onUpload(event: any) {
     this._loaderSvc.show();
     this.messageService.clear();
@@ -122,39 +125,4 @@ export class UploadFilesComponent implements OnInit {
   goToResultsPage() {
     this.router.navigate([AppConstant.URL_VIEW_CONVERTED_FILES]);
   }
-
-  // uploadViaSdK = async (file: File) => {
-  //   console.log('Test here');
-  //   let bucketParams = {
-  //     Bucket: environment.uploadedFilesBucket,
-  //     Key: file.name,
-  //     Body: file,
-  //     ContentType: file.type,
-  //   };
-  //   // Set the AWS Region.
-  //   const REGION = 'us-east-1'; //e.g. "us-east-1"
-  //   // Create an Amazon S3 service client object.
-  //   const s3Client = new S3Client({ region: REGION });
-  //   var AWS = require('aws-sdk');
-  //   AWS.config.getCredentials(function (err: any) {
-  //     if (err) {
-  //       console.log(err.stack);
-  //     } else {
-  //       console.log(AWS.config.credentials.accessKeyId);
-  //     }
-  //   });
-  //   try {
-  //     const data = await s3Client.send(new PutObjectCommand(bucketParams));
-  //     console.log(
-  //       'Successfully uploaded object: ' +
-  //         bucketParams.Bucket +
-  //         '/' +
-  //         bucketParams.Key
-  //     );
-  //     return data; // For unit tests.
-  //   } catch (err) {
-  //     console.log('Error', err);
-  //     return 'error';
-  //   }
-  // };
 }

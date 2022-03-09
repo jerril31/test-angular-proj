@@ -1,8 +1,3 @@
-::ng-deep .p-datatable-table {
-  font-family: Verdana, Helvetica;
-  /*font-size: 12px;*/
-}
-
 ::ng-deep .p-button {
   margin-right: 0.5rem;
 }
@@ -12,11 +7,11 @@
 }
 
 .view-main-div {
-  margin: 0 10rem 0 10rem;
+  margin: 0 15rem 0 15rem;
 }
 
 .download-link {
-  font-size: 1.4rem;
+  font-size: 22px;
   cursor: pointer;
   color: #7399c6;
 }
@@ -34,11 +29,33 @@
 }
 
 .divContainer {
-  margin: 3rem 0 3rem 0;
+  margin: 2rem 0 3rem 0;
 }
 
 .buttonArea {
   margin: 3rem 0 3rem 0;
+}
+
+::ng-deep .p-datatable {
+  font-family: Verdana, Helvetica;
+  background-color: #f8fbff;
+  border: 1px solid #98adc9;
+  -webkit-box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.2);
+  font-size: 1rem;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody {
+  font-size: 12px;
+}
+
+::ng-deep .p-datatable .p-datatable-thead {
+  font-size: 14px;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody .row-cell-content-filename {
+  padding-left: 4rem;
 }
 
 ::ng-deep .p-datatable .p-datatable-tbody .row-cell-content {
@@ -55,6 +72,7 @@
 
 .note-div {
   font-size: 16px;
+  font-weight: bold;
 }
 
 .imp-note-span {
@@ -66,28 +84,44 @@
 }
 
 ::ng-deep .p-datatable .p-sortable-column.p-highlight {
-  color: #343a40;
-  background-color: #f8f9fa;
+  background-color: #afdbfd;
+  color: #002a50;
 }
 ::ng-deep .p-datatable .p-sortable-column.p-highlight:hover {
-  color: #343a40;
-  background-color: #f8f9fa;
+  background-color: #afdbfd;
+  color: #002a50;
+}
+
+::ng-deep .p-datatable .p-sortable-column:not(.p-highlight):hover {
+  background-color: #afdbfd !important;
+  color: #002a50;
 }
 
 ::ng-deep .p-datatable .p-sortable-column:focus {
   box-shadow: none;
 }
-
+/** Uncomment during clean-up**/
 ::ng-deep .p-datatable .p-datatable-thead tr th {
   background-color: #afdbfd;
   color: #002a50;
   text-align: center;
 }
 
-::ng-deep .p-datatable .p-datatable-tbody tr:nth-child(even) {
+*::ng-deep .p-datatable .p-datatable-tbody tr:nth-child(even) {
   background-color: #ddeaf7;
 }
 
 .row-cell-content-filename {
   font-weight: bold;
+}
+
+.table-label-text {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.table-label-text .pi {
+  font-size: 25px;
+  font-weight: bold;
+  margin-bottom: 2rem;
 }

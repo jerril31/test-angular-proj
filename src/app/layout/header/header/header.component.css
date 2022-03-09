@@ -1,0 +1,31 @@
+@media (min-width: 1280px) {
+  .header_welcome-area_application-heading__h1,
+  .header_welcome-area_user-info {
+    padding-right: 2.2rem;
+  }
+
+  .header {
+    margin-bottom: 0.2rem;
+  }
+}
+.hide {
+  display: none;
+}
+@media (max-width: 1382px) and (min-width: 993px) {
+  .header {
+    height: 9.5rem;
+    padding: 1rem 2rem 0;
+  }
+  .header_welcome-area_application-info__heading {
+    line-height: 1.5em;
+  }
+}
+
+.pop-up-message__content__button-area {
+  margin-bottom: 2%;
+  margin-top: 2%;
+}
+
+.header {
+  margin: 0;
+}

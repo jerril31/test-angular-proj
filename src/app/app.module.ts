@@ -18,6 +18,8 @@ import { UploadFilesComponent } from './module/upload-files/upload-files.compone
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoaderComponent } from './layout/loader/loader.component';
 import { NgxFilesizeModule } from 'ngx-filesize';
+import { HeaderComponent } from './layout/header/header/header.component';
+import { FooterComponent } from './layout/footer/footer/footer.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +27,8 @@ import { NgxFilesizeModule } from 'ngx-filesize';
     ViewFilesComponent,
     UploadFilesComponent,
     LoaderComponent,
+    HeaderComponent,
+    FooterComponent,
   ],
   imports: [
     BrowserModule,

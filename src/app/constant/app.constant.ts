@@ -4,4 +4,7 @@ export namespace AppConstant {
 
   export const PROCESS_FOLDER_SUCCESS = 'success-files/';
   export const PROCESS_FOLDER_ERROR = 'error-files/';
+  export const UPLOAD_SCREEN = 'Upload Screen';
+  export const RESULT_SCREEN = 'Result Screen';
+  export const APP_NAME_PPRMR = 'PDF Permission Remover';
 }

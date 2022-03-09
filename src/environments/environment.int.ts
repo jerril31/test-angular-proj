@@ -4,4 +4,5 @@ export const environment = {
     'https://pa9jumd6vb.execute-api.us-east-1.amazonaws.com/dev/',
   uploadedFilesBucket: 'techops-eng-oem-uploaded-files-int',
   convertedFilesBucket: 'techops-eng-oem-converted-files-int',
+  appDeploymentLevel: 'INT',
 };
