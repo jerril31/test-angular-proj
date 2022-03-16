@@ -1,0 +1,15 @@
+::ng-deep .p-component {
+  font-family: Verdana, Helvetica;
+  font-size: 1.5rem;
+}
+
+::ng-deep .p-button {
+  background-color: #002a50;
+  border: #28639e;
+  padding: 1.25rem 1.75rem;
+  font-size: 16px;
+}
+
+::ng-deep .p-component .pi {
+  font-size: 18px;
+}

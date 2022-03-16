@@ -1,0 +1,38 @@
+<p-messages></p-messages>
+<div class="upload-main-div">
+  <div class="file-upload-div">
+    <div class="nav-area-div">
+      <button
+        type="button"
+        pButton
+        *ngIf="showViewResultButton"
+        (click)="goToResultsPage()"
+        label="View Processed File(s)"
+        icon="pi pi-arrow-right"
+        iconPos="right"
+      ></button>
+    </div>
+    <br />
+    <div>
+      <span class="warning-upload-msg">
+        <i class="pi pi-exclamation-circle">&nbsp;</i>Maximum Allowed File Size:
+        {{ maxFileSize | filesize }}.
+      </span>
+    </div>
+    <div class="file-upload-area">
+      <p-fileUpload
+        name="pdfFiles[]"
+        accept=".pdf"
+        [multiple]="true"
+        [customUpload]="true"
+        (uploadHandler)="onUpload($event)"
+        (onClear)="clearAll()"
+        cancelLabel="Clear All"
+        chooseLabel="Choose File(s)"
+        [fileLimit]="10"
+        [maxFileSize]="maxFileSize"
+      >
+      </p-fileUpload>
+    </div>
+  </div>
+</div>

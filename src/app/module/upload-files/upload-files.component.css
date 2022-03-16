@@ -1,0 +1,63 @@
+::ng-deep .upload-main-div {
+  min-width: 660px;
+}
+
+::ng-deep .p-fileupload .p-button:hover {
+  background-color: #7399c6;
+}
+
+::ng-deep .p-fileupload .p-fileupload-row {
+  font-size: 13px;
+  height: 3rem;
+  border-bottom: 1px solid #eef3f5;
+}
+
+::ng-deep .p-fileupload-files {
+  border-top: 1px solid #eef3f5;
+}
+
+::ng-deep .p-fileupload .p-fileupload-row div:first-child {
+  display: none;
+}
+::ng-deep .p-fileupload .p-fileupload-row .p-fileupload-filename {
+  width: 75%;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+::ng-deep .p-fileupload .p-fileupload-row .p-button {
+  height: 2rem;
+  width: 2rem;
+}
+
+::ng-deep .p-fileupload .p-progressbar .p-progressbar-value {
+  background-color: #002a50;
+}
+
+.p-button:hover {
+  background-color: #7399c6;
+}
+.p-button {
+  margin-bottom: 2rem;
+}
+
+.upload-main-div {
+  margin: 0 20rem 0 20rem;
+  position: relative;
+}
+
+.file-upload-div {
+  margin-top: 5rem;
+}
+.nav-area-div {
+  position: absolute;
+  right: 0;
+}
+
+.file-upload-area {
+  margin-top: 2rem;
+}
+.warning-upload-msg,
+.warning-upload-msg .pi {
+  font-size: 17px;
+}

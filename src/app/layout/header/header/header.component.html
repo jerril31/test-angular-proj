@@ -1,0 +1,49 @@
+<header class="header no-side-nav">
+  <!-- logo -->
+  <div class="header-logo">
+    <img
+      [src]="pathDeltaWhiteLogo"
+      alt="Delta TechOps Logo"
+      class="header-logo__img cursor-pointer"
+    />
+  </div>
+  <!-- /logo ---->
+  <!-- Welcome -->
+  <div class="header_welcome-area">
+    <h1 class="header_welcome-area_application-heading__h1">
+      {{ applicationName }}
+      <span class="appDeploymentLevel" *ngIf="appDeploymentLevel">
+        ({{ appDeploymentLevel | uppercase }})</span
+      >
+    </h1>
+
+    <div class="header_welcome-area_application-info">
+      <div class="header_welcome-area_application-info_aircraft-info"></div>
+      <h2 class="header_welcome-area_application-info__heading">{{ title }}</h2>
+    </div>
+    <div class="clearfix"></div>
+    <!-- user info -->
+    <div *ngIf="userName" class="header_welcome-area_user-info">
+      <span class="header_welcome-area_user-info__user-name">
+        Welcome {{ userName | titlecase }}</span
+      >
+      <!-- <a class="header_welcome-area_user-info__anchor" title="Logout">
+        Logout</a
+      > -->
+      <div class="header_welcome-area_user-info_action-item"></div>
+    </div>
+
+    <!--Clock - section-->
+    <div class="header_welcome-area_clock LMA-clock">
+      <div class="lma-clock-time">
+        <span class="header_welcome-area_clock__utc-date utc-date"
+          >{{ utcTime | date: "dd MMMYY HH:mm" }} Z |</span
+        >
+        <span class="header_welcome-area_clock__local-date local-date"
+          >{{ localTime | date: "dd MMMYY HH:mm" }} L</span
+        >
+      </div>
+    </div>
+  </div>
+  <!-- /Welcome -->
+</header>

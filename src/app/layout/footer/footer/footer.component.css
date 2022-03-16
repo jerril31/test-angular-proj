@@ -1,0 +1,11 @@
+.footer__copy-right-text {
+  float: left;
+}
+.footer__contact-us {
+  float: right;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.hide {
+  display: none;
+}
