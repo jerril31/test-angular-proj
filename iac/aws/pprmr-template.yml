@@ -1,0 +1,316 @@
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CF configuration for PDF Permission Remover AWS Components
+
+Parameters:
+  GroupResourcePrefix:
+    Type: String
+    Default: "techops-eng"
+    Description: "Prefix to use in naming resources to be created by this template"
+
+  AppPrefix:
+    Type: String
+    Default: "pprmr"
+    Description: "App Prefix to use in naming resources to be created by this template"
+
+  EnvAffix:
+    Type: String
+    Default: ""
+    Description: "Env affix to use in naming resources to be created by this template"
+
+  UploadFilesBucketName:
+    Type: String
+    Default: "oem-uploaded-files"
+    Description: "S3 bucket to host uploaded PDF files"
+
+  ConvertedFilesBucketName:
+    Type: String
+    Default: "oem-converted-files"
+    Description: "S3 bucket to host processed PDF files"
+
+  S3LogsBucketName:
+    Type: String
+    Default: "pprmr-logs"
+    Description: "S3 bucket to host S3 logs"
+
+  PprmrLambdaCodeBucket:
+    Type: String
+    Default: "pprmr-lambda-code-bucket"
+    Description: "S3 bucket that contains lambda function java project"
+
+  PprmrLambdaCodeKey:
+    Type: String
+    Default: "pdf-password-remover-lambda.jar"
+    Description: "S3 bucket file that contains lambda function java project"
+
+Resources:
+  UploadBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: "S3InvokeLambdaPermission"
+    Properties:
+      BucketName: !Sub "${GroupResourcePrefix}-${UploadFilesBucketName}-${EnvAffix}"
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Function: !GetAtt PprmrLambdaFunction.Arn
+            Event: "s3:ObjectCreated:Put"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: .pdf
+      # LoggingConfiguration:
+      #   DestinationBucketName: !Ref S3LogsBucket
+      #   LogFilePrefix: pprmr-s3-logs/uploaded-files-logs/
+      LifecycleConfiguration:
+        Rules:
+          - Id: delete-expired-uploaded-files
+            Status: Enabled
+            ExpirationInDays: 1
+            NoncurrentVersionExpirationInDays: 1
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins:
+              - "*"
+            AllowedMethods:
+              - POST
+              - GET
+              - PUT
+              - HEAD
+            AllowedHeaders:
+              - "*"
+      Tags:
+        - Key: Name
+          Value: !Sub "${GroupResourcePrefix}-${UploadFilesBucketName}-${EnvAffix}"
+
+    #add event trigger?
+    #add lifecycle rule
+    #add cross origin rule
+    #add server logs
+
+  ConvertedBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${GroupResourcePrefix}-${ConvertedFilesBucketName}-${EnvAffix}"
+      Tags:
+        - Key: Name
+          Value: !Sub "${GroupResourcePrefix}-${ConvertedFilesBucketName}-${EnvAffix}"
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3LogsBucket
+        LogFilePrefix: pprmr-s3-logs/converted-files-logs/
+      LifecycleConfiguration:
+        Rules:
+          - Id: delete-expired-error-files
+            Prefix: error-files/
+            Status: Enabled
+            ExpirationInDays: 1
+            NoncurrentVersionExpirationInDays: 1
+          - Id: delete-expired-success-files
+            Prefix: success-files/
+            Status: Enabled
+            ExpirationInDays: 1
+            NoncurrentVersionExpirationInDays: 1
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins:
+              - "*"
+            AllowedMethods:
+              - POST
+              - GET
+              - PUT
+              - HEAD
+            AllowedHeaders:
+              - "*"
+  #add lifecycle rule for error files
+  #add lifecycle rule for success files
+  #add cross origin rule
+  #add server logs
+
+  S3LogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${GroupResourcePrefix}-${S3LogsBucketName}-${EnvAffix}"
+      AccessControl: "LogDeliveryWrite"
+      Tags:
+        - Key: Name
+          Value: !Sub "${GroupResourcePrefix}-${S3LogsBucketName}-${EnvAffix}"
+      LifecycleConfiguration:
+        Rules:
+          - Id: delete-old-logs
+            Status: Enabled
+            ExpirationInDays: 1
+            NoncurrentVersionExpirationInDays: 1
+  #add lifecycle rule
+
+  #create IAM Role for Lambda
+  #Create IAM Policy for Lambda
+  #Create Pdfpwremover Lambda Function
+  #Create PResigned URL Lambda Function
+  #Create IAM Role for API Gateway
+  #Create IAM Policy for API Gateway
+  #Create API Gateway
+
+  ApiGatewayAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub "delegate-admin-${GroupResourcePrefix}-${EnvAffix}-${AppPrefix}-api"
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:ListBucketVersions
+              - s3:ListBucket
+              - s3:PutObjectTagging
+              - s3:DeleteObject
+            Effect: Allow
+            Resource:
+              - Fn::Sub: arn:aws:s3:::${GroupResourcePrefix}-${UploadFilesBucketName}-${EnvAffix}
+              - Fn::Sub: arn:aws:s3:::${GroupResourcePrefix}-${UploadFilesBucketName}-${EnvAffix}/*
+              - Fn::Sub: arn:aws:s3:::${GroupResourcePrefix}-${ConvertedFilesBucketName}-${EnvAffix}
+              - Fn::Sub: arn:aws:s3:::${GroupResourcePrefix}-${ConvertedFilesBucketName}-${EnvAffix}/*
+          - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              - "*"
+          - Action:
+              - s3:ListAllMyBuckets
+            Effect: Allow
+            Resource:
+              - Fn::Sub: arn:aws:s3:::${GroupResourcePrefix}-${UploadFilesBucketName}-${EnvAffix}
+              - Fn::Sub: arn:aws:s3:::${GroupResourcePrefix}-${UploadFilesBucketName}-${EnvAffix}/*
+              - Fn::Sub: arn:aws:s3:::${GroupResourcePrefix}-${ConvertedFilesBucketName}-${EnvAffix}
+              - Fn::Sub: arn:aws:s3:::${GroupResourcePrefix}-${ConvertedFilesBucketName}-${EnvAffix}/*
+
+  LambdaAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub "delegate-admin-${GroupResourcePrefix}-${EnvAffix}-${AppPrefix}-lambda"
+      Description: Techops Eng Pdf Pw Remover Policy for S3 and Cloudwatch
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:ListBucketVersions
+              - s3:ListBucket
+              - s3:PutObjectTagging
+              - s3:DeleteObject
+            Effect: Allow
+            Resource:
+              - Fn::Sub: arn:aws:s3:::${GroupResourcePrefix}-${UploadFilesBucketName}-${EnvAffix}
+              - Fn::Sub: arn:aws:s3:::${GroupResourcePrefix}-${UploadFilesBucketName}-${EnvAffix}/*
+              - Fn::Sub: arn:aws:s3:::${GroupResourcePrefix}-${ConvertedFilesBucketName}-${EnvAffix}
+              - Fn::Sub: arn:aws:s3:::${GroupResourcePrefix}-${ConvertedFilesBucketName}-${EnvAffix}/*
+          - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              - s3:ListAllMyBuckets
+            Effect: Allow
+            Resource:
+              - "*"
+
+  PprmrLambdaFunctionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub "delegate-admin-${GroupResourcePrefix}-${EnvAffix}-${AppPrefix}-lambda-access-role"
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+      Path: "/"
+      ManagedPolicyArns:
+        - !Ref LambdaAccessPolicy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - #Sid: "AllowLambdaServiceToAssumeRole"
+            Effect: "Allow"
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+
+  PprmrApiGatewayRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub "delegate-admin-${GroupResourcePrefix}-${EnvAffix}-${AppPrefix}-api-gateway-access-role"
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+      Path: "/"
+      ManagedPolicyArns:
+        - !Ref ApiGatewayAccessPolicy
+        - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - #Sid: "AllowApiGatewayToAssumeRole"
+            Effect: "Allow"
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "apigateway.amazonaws.com"
+
+  PprmrLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${GroupResourcePrefix}-${EnvAffix}-${AppPrefix}-lambda"
+      Description: Lambda function that will remove permission from uploaded PDF files from S3 bucket
+      Handler: com.delta.techops.eng.pprmr.PdfPwRemoverUploadHandler::handleRequest
+      Runtime: java8
+      Role: !GetAtt PprmrLambdaFunctionRole.Arn
+      Timeout: 300
+      MemorySize: 4096
+      Code:
+        S3Bucket: !Sub "${GroupResourcePrefix}-${EnvAffix}-${PprmrLambdaCodeBucket}"
+        S3Key: !Sub "${PprmrLambdaCodeKey}"
+      Environment:
+        Variables:
+          ENVIRONMENT: !Sub "${EnvAffix}"
+
+  PprmrPresgnUrlFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${GroupResourcePrefix}-${EnvAffix}-${AppPrefix}-prsgn-url-lambda"
+      Description: Lambda function that will return presigned URL for S3 connection
+      Handler: com.delta.techops.eng.pprmr.PdfPwRemoverPresignedUrlHandler::handleRequest
+      Runtime: java8
+      Role: !GetAtt PprmrLambdaFunctionRole.Arn
+      Timeout: 300
+      MemorySize: 512
+      Code:
+        S3Bucket: !Sub "${GroupResourcePrefix}-${EnvAffix}-${PprmrLambdaCodeBucket}"
+        S3Key: !Sub "${PprmrLambdaCodeKey}"
+
+  S3InvokeLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt PprmrLambdaFunction.Arn
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref "AWS::AccountId"
+      SourceArn: !Sub "arn:aws:s3:::${GroupResourcePrefix}-${UploadFilesBucketName}-${EnvAffix}"
+
+Outputs:
+  UploadedFilesS3Bucket:
+    Description: S3 Bucket for uploaded PDF files
+    Value: !Sub "${GroupResourcePrefix}-${UploadFilesBucketName}-${EnvAffix}"
+
+  ConvertedFilesS3Bucket:
+    Description: S3 Bucket for converted PDF files
+    Value: !Sub "${GroupResourcePrefix}-${ConvertedFilesBucketName}-${EnvAffix}"
+
+  S3LogsS3Bucket:
+    Description: S3 Bucket for S3 Logs
+    Value: !Sub "${GroupResourcePrefix}-${ConvertedFilesBucketName}-${EnvAffix}"
+
+  PdfPwRemoverLambdaFunc:
+    Description: PDF Pw Remover Lambda Function that removes pw permission from PDF
+    Value: !GetAtt PprmrLambdaFunction.Arn
+
+  PdfPwRemoverPresignUrlLambdaFunc:
+    Description: PDF Pw Remover Lambda Function that returns S3 Presigned URL
+    Value: !GetAtt PprmrPresgnUrlFunction.Arn
