@@ -1,0 +1,11 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - echo Deployment started on `date`
+      # - . ./script/exports.sh
+      - aws s3 sync dist/ s3://${BUCKET_NAME} --cache-control max-age=31536000
+  post_build:
+    commands:
+      - echo Deployment completed on `date`

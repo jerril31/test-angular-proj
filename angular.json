@@ -69,11 +69,11 @@
                 }
               ]
             },
-            "int": {
+            "si": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.int.ts"
+                  "with": "src/environments/environment.si.ts"
                 }
               ]
             },
@@ -106,8 +106,8 @@
             "dev": {
               "browserTarget": "pdf-pw-remover:build:dev"
             },
-            "int": {
-              "browserTarget": "pdf-pw-remover:build:int"
+            "si": {
+              "browserTarget": "pdf-pw-remover:build:si"
             },
             "lcl": {
               "browserTarget": "pdf-pw-remover:build:lcl"

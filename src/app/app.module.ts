@@ -20,6 +20,7 @@ import { LoaderComponent } from './layout/loader/loader.component';
 import { NgxFilesizeModule } from 'ngx-filesize';
 import { HeaderComponent } from './layout/header/header/header.component';
 import { FooterComponent } from './layout/footer/footer/footer.component';
+import { OAuthModule } from 'angular-oauth2-oidc';
 
 @NgModule({
   declarations: [
@@ -42,6 +43,7 @@ import { FooterComponent } from './layout/footer/footer/footer.component';
     BrowserAnimationsModule,
     NgxFilesizeModule,
     DividerModule,
+    OAuthModule.forRoot(),
   ],
   providers: [],
   bootstrap: [AppComponent],
