@@ -61,6 +61,13 @@ Metadata:
           - PresignedUrlLambdaFunctionTimeout
           - PresignedUrlLambdaFunctionMemory
 
+      - Label:
+          default: SPA Configurations
+        Parameters:
+          - SPABucketName
+          - SPACustomUri
+          - SPAHostedZoneId
+
 Parameters:
   # Prompt for Blockcode
   Blockcode:
@@ -238,15 +245,6 @@ Parameters:
     # Default: /delta/acm/pca/arn
     Default: "arn:aws:acm-pca:us-east-1:945041172800:certificate-authority/4d67b2ea-f6d6-410f-ac45-7466e2fb8351"
 
-    # PrefixDomainName:
-    #   Type: String
-    #   Default: "pdfpwdrmr-api"
-    #   Description: "Hosted zone for Domain Name"
-
-    # CertificateAuthority:
-    #   Type: List<AWS::ACMPCA::CertificateAuthority::Id>
-    #   Description: "Certificate Authority for Custom Domain Name"
-
   LambdaRoleName:
     Type: String
     Description: Enter the Lambda role name
@@ -308,6 +306,26 @@ Parameters:
     Type: Number
     Description: PDF Password Remover Memory Size
     Default: 512
+
+  #SPA
+  SPABucketName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-app-s3"
+    Description: "S3 bucket to host PDF Password Remover SPA"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  SPAHostedZoneId:
+    Type: String
+    #Default: "Z04698412PRZRE50Q7WCF"
+    Default: "Z05047779P3RJA97GJAC"
+    Description: "Hosted zone where CNAME record will be created"
+
+  SPACustomUri:
+    Type: String
+    Description: "SPA URL."
+    Default: "pdfpwdrmr.tech-engnring-dev.pub.delta.com"
+    #Default: "pdfpwdrmr.tech-engnring-dev.aws.delta.com"
 
 Resources:
   #####S3 Buckets#####
@@ -1048,6 +1066,161 @@ Resources:
             DNSName: !GetAtt APICustomDomain.RegionalDomainName
             HostedZoneId: !GetAtt APICustomDomain.RegionalHostedZoneId
 
+  #SPA
+  # Configure the bucket as a CloudFront Origin
+  ReadPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    DependsOn:
+      - CloudFrontOriginAccessIdentity
+    Properties:
+      Bucket: !Ref SPABucketName
+      PolicyDocument:
+        Statement:
+          - Action: "s3:GetObject"
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${SPABucketName}/*"
+            Principal:
+              CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+
+  CloudFrontOriginAccessIdentity:
+    Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Ref SPABucketName
+
+  DomainCNameRecordSet:
+    Type: AWS::Route53::RecordSet
+    DependsOn: CFDistribution
+    Properties:
+      HostedZoneId: !Ref SPAHostedZoneId
+      Name: !Ref SPACustomUri
+      ResourceRecords:
+        - !GetAtt CFDistribution.DomainName
+      TTL: 900
+      Type: CNAME
+
+  CloudFrontCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        DefaultTTL: 86400
+        MaxTTL: 31536000
+        MinTTL: 1
+        Name: LambdaAtEdgeCachePolicy
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: "none"
+          EnableAcceptEncodingBrotli: "true"
+          EnableAcceptEncodingGzip: "true"
+          HeadersConfig:
+            HeaderBehavior: "none"
+          QueryStringsConfig:
+            QueryStringBehavior: "none"
+
+  #Certificate
+  DomainCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref SPACustomUri
+      DomainValidationOptions:
+        - DomainName: !Ref SPACustomUri
+          HostedZoneId: !Ref SPAHostedZoneId
+      ValidationMethod: DNS
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  CFDistribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn:
+      - DomainCertificate
+    #   - ViewerRequestLambdaAtEdgeFunction
+    Properties:
+      DistributionConfig:
+        Enabled: "true"
+        Aliases:
+          - !Ref SPACustomUri
+        ViewerCertificate:
+          AcmCertificateArn: !Ref DomainCertificate
+          MinimumProtocolVersion: "TLSv1.2_2021"
+          SslSupportMethod: "sni-only"
+        Origins:
+          - DomainName: !Sub ${SPABucketName}.s3.amazonaws.com
+            Id: myS3Origin
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
+        Comment: Serve static content from private S3 bucket with SSO login
+        DefaultRootObject: index.html
+        CustomErrorResponses:
+          - ErrorCachingMinTTL: 216000
+            ErrorCode: 403
+            ResponsePagePath: /index.html
+            ResponseCode: 403
+          - ErrorCachingMinTTL: 216000
+            ErrorCode: 404
+            ResponsePagePath: /index.html
+            ResponseCode: 404
+        DefaultCacheBehavior:
+          TargetOriginId: myS3Origin
+          # LambdaFunctionAssociations:
+          #   -
+          #     EventType: viewer-request
+          #     LambdaFunctionARN: !Ref ViewerRequestLambdaFunctionVersion
+          CachePolicyId: !Ref CloudFrontCachePolicy
+          # OriginRequestPolicyId: !Ref CloudFrontOriginRequestPolicy
+          ViewerProtocolPolicy: "https-only"
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
 Outputs:
   UploadedFilesS3Bucket:
     Description: S3 Bucket for uploaded PDF files
@@ -1074,5 +1247,9 @@ Outputs:
     Value: !Ref PprmrApiGateway
 
   PdfPwRemoveDomainName:
-    Description: PDF Pw Remover Route 53
+    Description: PDF Pw Remover API URL
     Value: !Ref APICustomUri
+
+  SPADomainName:
+    Description: PDF Pw Remover SPA URL
+    Value: !Ref SPACustomUri
