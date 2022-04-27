@@ -46,7 +46,8 @@ Metadata:
           - APIRestApiName
           - APICustomUri
           - APIEndpointType
-          - Route53HostedZone
+          - APICustomRoute53
+          - APIHostedZoneId
           - CertificateAuthorityArnValue
       - Label:
           default: Lambda Function Configurations
@@ -54,7 +55,11 @@ Metadata:
           - PprmrLambdaCodeBucket
           - PprmrLambdaCodeKey
           - PprmrLambdaFunctionName
+          - PprmrLambdaFunctionTimeout
+          - PprmrLambdaFunctionMemory
           - PprmrPresignedLambdaFunctionName
+          - PresignedUrlLambdaFunctionTimeout
+          - PresignedUrlLambdaFunctionMemory
 
 Parameters:
   # Prompt for Blockcode
@@ -156,37 +161,37 @@ Parameters:
   Environment:
     Description: Environment to deploy.
     Type: String
-    Default: dev2
-    AllowedValues: ["dev2", "dev", "si", "prod"]
+    Default: dev
+    AllowedValues: ["dev", "si", "prod"]
     ConstraintDescription: Must specify dev, si or prod.
 
   ##S3 Buckets
   UploadFilesBucketName:
     Type: String
-    Default: "techops-eng-dev2-pprmr-uploaded-files-s3"
+    Default: "techops-eng-dev-pprmr-uploaded-files-s3"
     Description: "S3 bucket to host uploaded PDF files"
-    AllowedPattern: ^techops-eng[-](dev2|dev|si|prd)[-](.*?)[-]s3$
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
   ConvertedFilesBucketName:
     Type: String
-    Default: "techops-eng-dev2-pprmr-converted-files-s3"
+    Default: "techops-eng-dev-pprmr-converted-files-s3"
     Description: "S3 bucket to host processed PDF files"
-    AllowedPattern: ^techops-eng[-](dev2|dev|si|prd)[-](.*?)[-]s3$
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
   S3LogsBucketName:
     Type: String
-    Default: "techops-eng-dev2-pprmr-logs-s3"
+    Default: "techops-eng-dev-pprmr-logs-s3"
     Description: "S3 bucket to host S3 logs"
-    AllowedPattern: ^techops-eng[-](dev2|dev|si|prd)[-](.*?)[-]s3$
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
   PprmrLambdaCodeBucket:
     Type: String
-    Default: "techops-eng-dev2-pprmr-lambda-code-s3"
+    Default: "techops-eng-dev-pprmr-lambda-code-s3"
     Description: "S3 bucket that contains lambda function java project"
-    AllowedPattern: ^techops-eng[-](dev2|dev|si|prd)[-](.*?)[-]s3$
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
   PprmrLambdaCodeKey:
@@ -196,28 +201,35 @@ Parameters:
 
   APIRestApiName:
     Type: String
-    Default: "techops-eng-dev2-pprmr-api"
+    Default: "techops-eng-dev-pprmr-api"
     Description: "PDF Pwd Remover API Gateway Name"
-    AllowedPattern: ^techops-eng[-](dev2|dev|si|prd)[-](.*?)[-]api$
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]api$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
   APICustomUri:
     Type: String
     Description: "The name of the stage to deploy the API to."
-    Default: "pdfpwdrmr-api.techops-dev.aws.delta.com"
+    Default: "pdfpwdrmr-api.tech-engnring-dev.aws.delta.com"
 
-  Route53HostedZone:
+  # Route53HostedZone:
+  #   Type: String
+  #   Description: The name of the Route53HostedZone created in the AWS account
+  #   Default: tech-engnring-dev.aws.delta.com.
+
+  APIHostedZoneId:
     Type: String
-    Description: The name of the Route53HostedZone created in the AWS account
-    Default: techops-dev.aws.delta.com.
+    #Default: "Z04698412PRZRE50Q7WCF"
+    Default: "Z04698412PRZRE50Q7WCF"
+    Description: "Hosted zone where API CNAME record will be created"
 
   APIEndpointType:
     Type: String
-    Description: "The name of the EndpointType for the custom domain values are Regional,Edge"
+    Description: "The name of the EndpointType for the custom domain values are Regional, Edge, Private"
     Default: "REGIONAL"
     AllowedValues:
       - REGIONAL
       - PRIVATE
+      - EDGE
 
   CertificateAuthorityArnValue:
     # Type : 'AWS::SSM::Parameter::Value<String>'
@@ -238,44 +250,64 @@ Parameters:
   LambdaRoleName:
     Type: String
     Description: Enter the Lambda role name
-    Default: delegate-admin-techops-eng-dev2-pprmr-lambda-access-role
-    AllowedPattern: ^delegate-admin-techops-eng[-](dev2|dev|si|prd)[-](.*?)[-]role$
+    Default: delegate-admin-techops-eng-dev-pprmr-lambda-access-role
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]role$
     MaxLength: 64
 
   ApiRoleName:
     Type: String
     Description: Enter the API Gateway role name
-    Default: delegate-admin-techops-eng-dev2-pprmr-api-gateway-access-role
-    AllowedPattern: ^delegate-admin-techops-eng[-](dev2|dev|si|prd)[-](.*?)[-]role$
+    Default: delegate-admin-techops-eng-dev-pprmr-api-gateway-access-role
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]role$
     MaxLength: 64
 
   LambdaPolicyName:
     Type: String
     Description: Enter the Lambda Policy name
-    Default: delegate-admin-techops-eng-dev2-pprmr-lambda-policy
-    AllowedPattern: ^delegate-admin-techops-eng[-](dev2|dev|si|prd)[-](.*?)[-]policy$
+    Default: delegate-admin-techops-eng-dev-pprmr-lambda-policy
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]policy$
     MaxLength: 64
 
   ApiPolicyName:
     Type: String
     Description: Enter the API Gateway Policy name
-    Default: delegate-admin-techops-eng-dev2-pprmr-api-policy
-    AllowedPattern: ^delegate-admin-techops-eng[-](dev2|dev|si|prd)[-](.*?)[-]policy$
+    Default: delegate-admin-techops-eng-dev-pprmr-api-policy
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]policy$
     MaxLength: 64
 
   PprmrLambdaFunctionName:
     Type: String
     Description: Enter the Lambda function name
-    Default: techops-eng-dev2-pprmr-lambda
-    AllowedPattern: ^techops-eng[-](dev2|dev|si|prd)[-](.*?)[-]lambda$
+    Default: techops-eng-dev-pprmr-lambda
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
     MaxLength: 64
+
+  PprmrLambdaFunctionTimeout:
+    Type: Number
+    Description: PDF Password Remover Timeout
+    Default: 300
+
+  PprmrLambdaFunctionMemory:
+    Type: Number
+    Description: PDF Password Remover Memory Size
+    Default: 4096
 
   PprmrPresignedLambdaFunctionName:
     Type: String
     Description: Enter the Presigned Lambda function name
-    Default: techops-eng-dev2-pprmr-prsgn-url-lambda
-    AllowedPattern: ^techops-eng[-](dev2|dev|si|prd)[-](.*?)[-]lambda$
+    Default: techops-eng-dev-pprmr-prsgn-url-lambda
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
     MaxLength: 64
+
+  PresignedUrlLambdaFunctionTimeout:
+    Type: Number
+    Description: PDF Password Remover Timeout
+    Default: 300
+
+  PresignedUrlLambdaFunctionMemory:
+    Type: Number
+    Description: PDF Password Remover Memory Size
+    Default: 512
 
 Resources:
   #####S3 Buckets#####
@@ -611,8 +643,8 @@ Resources:
       Handler: com.delta.techops.eng.pprmr.PdfPwRemoverUploadHandler::handleRequest
       Runtime: java8
       Role: !GetAtt PprmrLambdaFunctionRole.Arn
-      Timeout: 300
-      MemorySize: 4096
+      Timeout: !Ref PprmrLambdaFunctionTimeout
+      MemorySize: !Ref PprmrLambdaFunctionMemory
       Code:
         S3Bucket: !Ref PprmrLambdaCodeBucket
         S3Key: !Ref PprmrLambdaCodeKey
@@ -651,8 +683,8 @@ Resources:
       Handler: com.delta.techops.eng.pprmr.PdfPwRemoverPresignedUrlHandler::handleRequest
       Runtime: java8
       Role: !GetAtt PprmrLambdaFunctionRole.Arn
-      Timeout: 300
-      MemorySize: 512
+      Timeout: !Ref PresignedUrlLambdaFunctionTimeout
+      MemorySize: !Ref PresignedUrlLambdaFunctionMemory
       Code:
         S3Bucket: !Ref PprmrLambdaCodeBucket
         S3Key: !Ref PprmrLambdaCodeKey
@@ -767,15 +799,15 @@ Resources:
       Description: API Deployment
       RestApiId: !Ref PprmrApiGateway
       StageName: !Sub "${Environment}"
-      StageDescription:
-        Description: Deployment Stage
-        AccessLogSetting:
-          DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
-          Format: '{"apiId":"$context.apiId","stage":"$context.stage","resourcePath":"$context.resourcePath","requestId":"$context.requestId","awsEndpointRequestId":"$context.awsEndpointRequestId","xrayTraceId":"$context.xrayTraceId","requestTime":"$context.requestTime","requestTimeEpoch":$context.requestTimeEpoch,"httpMethod":"$context.httpMethod","status":"$context.status","path":"$context.path"}'
-        LoggingLevel: INFO
-        MetricsEnabled: true
-        DataTraceEnabled: true
-        TracingEnabled: true
+      # StageDescription:
+      #   Description: Deployment Stage
+      #   AccessLogSetting:
+      #     DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
+      #     Format: '{"apiId":"$context.apiId","stage":"$context.stage","resourcePath":"$context.resourcePath","requestId":"$context.requestId","awsEndpointRequestId":"$context.awsEndpointRequestId","xrayTraceId":"$context.xrayTraceId","requestTime":"$context.requestTime","requestTimeEpoch":$context.requestTimeEpoch,"httpMethod":"$context.httpMethod","status":"$context.status","path":"$context.path"}'
+      #   LoggingLevel: INFO
+      #   MetricsEnabled: true
+      #   DataTraceEnabled: true
+      #   TracingEnabled: true
 
   #Get Bucket Contents Endpoint
   ApiGatewayGetBucketMethod:
@@ -1003,31 +1035,18 @@ Resources:
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
 
-  # APICustomRoute53:
-  #   Type: AWS::Route53::RecordSet
-  #   Properties:
-  #     HostedZoneName: !Ref Route53HostedZone
-  #     Name: !Ref APICustomUri
-  #     Type: A
-  #     ResourceRecords:
-  #       - !Ref APICustomDomain
-  #     TTL: 300
-
   APICustomRoute53:
     Type: AWS::Route53::RecordSetGroup
     DependsOn: APICustomDomain
     Properties:
-      HostedZoneName: !Ref Route53HostedZone
+      #HostedZoneName: !Ref Route53HostedZone
+      HostedZoneId: !Ref APIHostedZoneId
       RecordSets:
         - Name: !Ref APICustomUri
           Type: A
           AliasTarget:
             DNSName: !GetAtt APICustomDomain.RegionalDomainName
             HostedZoneId: !GetAtt APICustomDomain.RegionalHostedZoneId
-
-#create certificate
-#create domain name
-#create Route 53 entry
 
 Outputs:
   UploadedFilesS3Bucket:
