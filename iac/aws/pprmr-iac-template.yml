@@ -88,7 +88,7 @@ Parameters:
     Type: String
     Description: Enter the unique id for the Application
     AllowedPattern: ^(D|A)[0-9]{7}$
-    Default: D0021372
+    Default: D0021487
 
   # Prompt for DataClassification
   DataClassification:
@@ -1157,6 +1157,7 @@ Resources:
     #   - ViewerRequestLambdaAtEdgeFunction
     Properties:
       DistributionConfig:
+        PriceClass: "PriceClass_100"
         Enabled: "true"
         Aliases:
           - !Ref SPACustomUri
