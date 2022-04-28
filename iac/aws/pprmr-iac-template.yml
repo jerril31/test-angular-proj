@@ -169,8 +169,8 @@ Parameters:
     Description: Environment to deploy.
     Type: String
     Default: dev
-    AllowedValues: ["dev", "si", "prod"]
-    ConstraintDescription: Must specify dev, si or prod.
+    AllowedValues: ["dev", "si", "prd"]
+    ConstraintDescription: Must specify dev, si or prd.
 
   ##S3 Buckets
   UploadFilesBucketName:

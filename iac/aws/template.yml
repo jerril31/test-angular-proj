@@ -1,13 +1,166 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
+Metadata:
+  "AWS::CloudFormation::Interface":
+    ParameterGroups:
+      - Label:
+          default: Required Tags
+        Parameters:
+          - Blockcode
+          - CostCenter
+          - UniqueID
+          - DataClassification
+          - SupportGroup
+          - ChangeGroup
+          - DrTier
+          - PciIndicator
+          - PhiIndicator
+          - SoxIndicator
+          - CuiIndicator
+      - Label:
+          default: Application Configurations
+        Parameters:
+          - AppPrefix
+          - GroupResourcePrefix
+          - Environment
+
+      - Label:
+          default: SPA GIT Configurations
+        Parameters:
+          - GitPullSubnet
+          - GitPullVpc
+          - SecurityGroup
+          - CodeBaseBranch
+          - CodeBaseGitUrl
+          - CodeBaseContextPath
+          - SourceActionVersion
+          - SourceActionProvider
+          - CodePipelineName
+          - CodeBaseAccessTokenUserName
+          - CodeBaseAccessTokenPassword
+          - GitWebHookIpAddress
+          - CodeBasePipelineWebhookName
+          - SecretName
+
+      - Label:
+          default: Code Build and Pipeline
+        Parameters:
+          - CodeBuildServiceRoleName
+          - CodeBuildPolicyName
+          - PipelineRoleName
+          - CodePipelinePolicyName
+          - ArtifactStoreBucket
+
+      - Label:
+          default: SPA Configurations
+        Parameters:
+          - SiteBucket
 
 Parameters:
-  PrefixLabel:
-    Description: 3 letter lowercase string to prefix all resources created by this stack.  This will allow multiple teams to deploy this pattern in the same AWS account
+  # Prompt for Blockcode
+  Blockcode:
     Type: String
-    Default: "lxo"
-    MaxLength: 3
-    AllowedPattern: ^[a-zA-Z]*$
+    Description: Enter the block code for the Application
+    AllowedPattern: ^[A-Z]{10}$
+    Default: TOPEGDRPPO
+
+  # Prompt for CostCenter
+  CostCenter:
+    Type: String
+    Description: Enter the cost center for the Application
+    AllowedPattern: ^C[0-9]{4}ATG$
+    Default: C8730ATG
+
+  # Prompt for UniqueID
+  UniqueID:
+    Type: String
+    Description: Enter the unique id for the Application
+    AllowedPattern: ^(D|A)[0-9]{7}$
+    Default: D0021372
+
+  # Prompt for DataClassification
+  DataClassification:
+    Type: String
+    Description: Enter the data classification for the Application
+    AllowedValues:
+      - public
+      - internal
+      - confidential
+      - restricted
+    Default: confidential
+
+  # Prompt for cuiIndicator
+  CuiIndicator:
+    Type: String
+    Description: Refers to the category of unclassified information within the U.S. Federal government. Confidential.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for pciIndicator
+  PciIndicator:
+    Type: String
+    Description: Refers to the category used for credit cardholder data and sensitive authentication data.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for phiIndicator
+  PhiIndicator:
+    Type: String
+    Description: Refers to any health information (medical and insurance) related to an individual.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for soxIndicator
+  SoxIndicator:
+    Type: String
+    Description: Refers to any information that has a direct and material impact on Delta's financial reporting.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for DrTier
+  DrTier:
+    Type: String
+    Description: A tier designation, which defines the chronological order of recovery for an application during an IT Disaster event
+    AllowedValues:
+      - mission vital
+      - mission critical
+      - business critical
+      - business essential
+      - business
+    Default: business essential
+
+  # Prompt for SupportGroup
+  SupportGroup:
+    Type: String
+    Description: Enter the support group for the Application
+    AllowedPattern: ^[A-Za-z0-9_ -]+$
+    Default: DN - MEMDS2
+
+  # Prompt for ChangeGroup
+  ChangeGroup:
+    Type: String
+    Description: Enter the change group for the Application
+    AllowedPattern: ^[A-Za-z0-9_ -]+$
+    Default: DN - MEMDS2
+
+  GroupResourcePrefix:
+    Type: String
+    Default: "techops-eng"
+    Description: "Prefix to use in naming resources to be created by this template"
+
+  AppPrefix:
+    Type: String
+    Default: "pprmr"
+    Description: "App Prefix to use in naming resources to be created by this template"
+
+  Environment:
+    Description: Environment to deploy.
+    Type: String
+    Default: dev
+    AllowedValues: ["dev", "si", "prd"]
+    ConstraintDescription: Must specify dev, si or prd.
+
+  #Git Details
   GitPullSubnet:
     Description: The subnet that the CodePipeline and CodeBuild will be deployed in. These are private subnet and your source control should be accessible from this subnet. Atleast 2 subnets needs to be selected
     Type: "List<AWS::EC2::Subnet::Id>"
@@ -42,7 +195,8 @@ Parameters:
   CodePipelineName:
     Description: Name for CodePipeline. A good pattern is GitLab Group followed by Git repo name. ex=ccoe.my-project-name
     Type: String
-    Default: "techhops-eng-pprmr-spa-pipeline"
+    Default: "techops-eng-pprmr-spa-pipeline"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]pipeline$
   CodeBaseAccessTokenUserName:
     Description: The access token for the CodeBase repo.
     Type: String
@@ -67,35 +221,85 @@ Parameters:
     Description: S3 bucket name for SPA UI code for 3rd party git integration
     Type: String
     Default: gitlab-custom-source-artifactstore
-  ProjectName:
+  # ProjectName:
+  #   Type: String
+  #   Description: The name of the project for which we are building this CI/CD pipeline
+  #   Default: pprmr-spa
+
+  SiteBucket:
     Type: String
-    Description: The name of the project for which we are building this CI/CD pipeline
-    Default: pprmr-spa
-  SiteBucketName:
-    Description: S3 bucket name for SPA UI hosting
+    Default: "techops-eng-dev-pprmr-app-s3"
+    Description: "S3 bucket to host PDF Password Remover SPA"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  SecretName:
     Type: String
-    Default: pprmr-spa
+    Default: "techops-eng-dev-pprmr-secret"
+    Description: "PDF Pw Remover Secret Name"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]secret$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  CodePipelinePolicyName:
+    Type: String
+    Description: Enter the Code Pipeline Policy name
+    Default: delegate-admin-techops-eng-dev-pprmr-codepipeline-policy
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]policy$
+    MaxLength: 64
+
+  CodeBuildPolicyName:
+    Type: String
+    Description: Enter the Code Build Policy name
+    Default: delegate-admin-techops-eng-dev-pprmr-codebuild-policy
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]policy$
+    MaxLength: 64
+
+  CodeBasePipelineWebhookName:
+    Type: String
+    Description: Enter the Code Base Pipeline Webhook name
+    Default: techops-eng-dev-pprmr-codebase-pipeline-webhook
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]webhook$
 
 Resources:
   CodeBaseAccessTokenSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: !Sub ${PrefixLabel}-pprmr-spa-sm
+      Name: !Ref SecretName
       Description: The user and access token for the Build Spec project
       SecretString: !Sub "${CodeBaseAccessTokenUserName}:${CodeBaseAccessTokenPassword}"
 
-  SiteBucket:
+  SPABucketName:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${PrefixLabel}-${SiteBucketName}"
+      BucketName: !Ref SiteBucket
       Tags:
-        - Key: Name
-          Value: !Sub "${PrefixLabel}-${SiteBucketName}"
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
 
   CodePipelinePolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ${PrefixLabel}-CodePipelinePolicy
+      PolicyName: !Ref CodePipelinePolicyName
       Roles:
         - !Ref PipelineRoleName
       PolicyDocument:
@@ -119,10 +323,11 @@ Resources:
             Effect: Allow
             Resource:
               - !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${AWS::StackName}*"
+
   CodeBuildPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub "delegate-admin-CodeBuildPolicy-${PrefixLabel}"
+      PolicyName: !Ref CodeBuildPolicyName
       Roles:
         - !Ref CodeBuildServiceRoleName
       PolicyDocument:
@@ -156,7 +361,7 @@ Resources:
         EncryptionKey:
           Id: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/gitlab-codepipeline-cmk"
           Type: KMS
-      Name: !Sub ${PrefixLabel}-${CodePipelineName}
+      Name: !Ref CodePipelineName
       RestartExecutionOnUpdate: true
       RoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/${PipelineRoleName}"
       Stages:
@@ -174,7 +379,7 @@ Resources:
                 Branch: !Ref CodeBaseBranch
                 GitUrl: !Ref CodeBaseGitUrl
                 ContextPath: !Ref CodeBaseContextPath
-                PipelineName: !Sub ${PrefixLabel}-${CodePipelineName}
+                PipelineName: !Ref CodePipelineName
                 AccessTokenSecretKeyName: !Ref CodeBaseAccessTokenSecret
               RunOrder: 1
         - Name: Build
@@ -210,7 +415,8 @@ Resources:
   CodeBasePipelineWebhook:
     Type: "AWS::CodePipeline::Webhook"
     Properties:
-      TargetPipeline: !Sub ${PrefixLabel}-CodeBasePipelineWebhook
+      Name: !Ref CodeBasePipelineWebhookName
+      TargetPipeline: !Ref CodePipelineName
       TargetPipelineVersion: 1
       TargetAction: Source
       Filters:
@@ -258,73 +464,73 @@ Resources:
         Image: "aws/codebuild/standard:3.0"
         EnvironmentVariables:
           - Name: BUCKET_NAME
-            Value: !Sub "${PrefixLabel}-${SiteBucketName}"
+            Value: !Sub "${SiteBucketName}"
       Source:
         Type: CODEPIPELINE
         BuildSpec: deployspec.yml
       TimeoutInMinutes: 5
 
-  CloudFormationServiceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub delegate-admin-cf-${PrefixLabel}-${ProjectName}-role
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - cloudformation.amazonaws.com
-            Action:
-              - sts:AssumeRole
-      Path: /
-      ManagedPolicyArns:
-        - !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-iam-access-policy
-      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
-      Policies:
-        - PolicyName: delegate-admin-CloudFormationPolicy-Inline
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:ListBucket
-                  - s3:GetObjectVersion
-                  - s3:GetBucketVersioning
-                Resource:
-                  - "*"
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                  - s3:GetObject
-                  - s3:ListBucket
-                Resource:
-                  - Fn::Sub: arn:aws:s3:::${ArtifactStoreBucket}-${AWS::AccountId}/*
-                  - Fn::Sub: arn:aws:s3:::${SiteBucket}/*
-              - Effect: Allow
-                Action:
-                  - iam:GetRole
-                  - iam:CreateRole
-                  - iam:DeleteRole
-                  - iam:PutRolePolicy
-                Resource:
-                  - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/*
-              - Effect: Allow
-                Action:
-                  - iam:AttachRolePolicy
-                  - iam:DeleteRolePolicy
-                  - iam:DetachRolePolicy
-                Resource:
-                  - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/*
-              - Effect: Allow
-                Action:
-                  - iam:PassRole
-                Resource:
-                  - "*"
+  # CloudFormationServiceRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: !Sub delegate-admin-cf-${PrefixLabel}-${ProjectName}-role
+  #     AssumeRolePolicyDocument:
+  #       Version: 2012-10-17
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service:
+  #               - cloudformation.amazonaws.com
+  #           Action:
+  #             - sts:AssumeRole
+  #     Path: /
+  #     ManagedPolicyArns:
+  #       - !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-iam-access-policy
+  #     PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+  #     Policies:
+  #       - PolicyName: delegate-admin-CloudFormationPolicy-Inline
+  #         PolicyDocument:
+  #           Version: 2012-10-17
+  #           Statement:
+  #             - Effect: Allow
+  #               Action:
+  #                 - s3:GetObject
+  #                 - s3:ListBucket
+  #                 - s3:GetObjectVersion
+  #                 - s3:GetBucketVersioning
+  #               Resource:
+  #                 - "*"
+  #             - Effect: Allow
+  #               Action:
+  #                 - s3:PutObject
+  #                 - s3:GetObject
+  #                 - s3:ListBucket
+  #               Resource:
+  #                 - Fn::Sub: arn:aws:s3:::${ArtifactStoreBucket}-${AWS::AccountId}/*
+  #                 - Fn::Sub: arn:aws:s3:::${SiteBucket}/*
+  #             - Effect: Allow
+  #               Action:
+  #                 - iam:GetRole
+  #                 - iam:CreateRole
+  #                 - iam:DeleteRole
+  #                 - iam:PutRolePolicy
+  #               Resource:
+  #                 - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/*
+  #             - Effect: Allow
+  #               Action:
+  #                 - iam:AttachRolePolicy
+  #                 - iam:DeleteRolePolicy
+  #                 - iam:DetachRolePolicy
+  #               Resource:
+  #                 - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/*
+  #             - Effect: Allow
+  #               Action:
+  #                 - iam:PassRole
+  #               Resource:
+  #                 - "*"
 
 Outputs:
   SPAS3BucketName:
     Description: |
       'S3 Bucket where SPA is deployed'
-    Value: !Sub "${PrefixLabel}-${SiteBucketName}"
+    Value: !Sub "${SiteBucketName}"
