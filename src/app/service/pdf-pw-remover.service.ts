@@ -102,7 +102,7 @@ export class PdfPwRemoverService {
       )
       .pipe(
         concatMap((res: any) => {
-          console.log(res);
+          //console.log(res);
           return this.http.put(res.presignedUrl, file, requestOptions);
         })
       );
@@ -164,7 +164,8 @@ export class PdfPwRemoverService {
       )
       .pipe(
         concatMap((res: any) => {
-          console.log(res);
+          //console.log(res);
+          
           return this.http
             .get(res.presignedUrl, {
               headers: headers,

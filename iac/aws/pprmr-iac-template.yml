@@ -196,7 +196,7 @@ Parameters:
 
   PprmrLambdaCodeBucket:
     Type: String
-    Default: "techops-eng-dev-pprmr-lambda-code-s3"
+    Default: "techops-eng-dev-pprmr-lambdacode-s3"
     Description: "S3 bucket that contains lambda function java project"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
@@ -216,7 +216,7 @@ Parameters:
   APICustomUri:
     Type: String
     Description: "The name of the stage to deploy the API to."
-    Default: "pdfpwdrmr-api.tech-engnring-dev.aws.delta.com"
+    Default: "pdfpwdrmr-api.tech-eng-doc-dev.aws.delta.com"
 
   # Route53HostedZone:
   #   Type: String
@@ -226,7 +226,7 @@ Parameters:
   APIHostedZoneId:
     Type: String
     #Default: "Z04698412PRZRE50Q7WCF"
-    Default: "Z04698412PRZRE50Q7WCF"
+    Default: "Z0215960IIPS18QMPP1Q"
     Description: "Hosted zone where API CNAME record will be created"
 
   APIEndpointType:
@@ -310,7 +310,7 @@ Parameters:
   #SPA
   SPABucketName:
     Type: String
-    Default: "techops-eng-dev-pprmr-app-s3"
+    Default: "techops-eng-dev-pprmr-spa-s3"
     Description: "S3 bucket to host PDF Password Remover SPA"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
@@ -318,14 +318,32 @@ Parameters:
   SPAHostedZoneId:
     Type: String
     #Default: "Z04698412PRZRE50Q7WCF"
-    Default: "Z05047779P3RJA97GJAC"
+    Default: "Z05930841BO2EVUF6BZ5N"
     Description: "Hosted zone where CNAME record will be created"
 
   SPACustomUri:
     Type: String
     Description: "SPA URL."
-    Default: "pdfpwdrmr.tech-engnring-dev.pub.delta.com"
-    #Default: "pdfpwdrmr.tech-engnring-dev.aws.delta.com"
+    Default: "pdfpwdrmr.tech-eng-doc-dev.pub.delta.com"
+    #Default: "tech-eng-doc-dev.aws.delta.com"
+
+  TopicName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-s3-topic"
+    Description: "S3 Bucket Event Notif Topic"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]topic$
+
+  SPAWebACLName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-spa-waf"
+    Description: "SPA Web ACL"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]waf$
+
+  APIWebACLName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-api-waf"
+    Description: "API Web ACL"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]waf$
 
 Resources:
   #####S3 Buckets#####
@@ -344,10 +362,14 @@ Resources:
                 Rules:
                   - Name: suffix
                     Value: .pdf
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
       #TODO Uncomment
-      # LoggingConfiguration:
-      #   DestinationBucketName: !Ref S3LogsBucket
-      #   LogFilePrefix: pprmr-s3-logs/uploaded-files-logs/
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3LogsBucketName
+        LogFilePrefix: pprmr-s3-logs/uploaded-files-logs/
       LifecycleConfiguration:
         Rules:
           - Id: delete-expired-uploaded-files
@@ -395,9 +417,13 @@ Resources:
     Properties:
       BucketName: !Ref ConvertedFilesBucketName
       #TODO Uncomment
-      # LoggingConfiguration:
-      #   DestinationBucketName: !Ref S3LogsBucket
-      #   LogFilePrefix: pprmr-s3-logs/converted-files-logs/
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3LogsBucketName
+        LogFilePrefix: pprmr-s3-logs/converted-files-logs/
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
       LifecycleConfiguration:
         Rules:
           - Id: delete-expired-error-files
@@ -445,42 +471,42 @@ Resources:
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
 
-  #S3 Bucket for Logs
-  S3LogsBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref S3LogsBucketName
-      AccessControl: "LogDeliveryWrite"
-      LifecycleConfiguration:
-        Rules:
-          - Id: delete-old-logs
-            Prefix: pprmr-s3-logs/
-            Status: Enabled
-            ExpirationInDays: 1
-            NoncurrentVersionExpirationInDays: 1
-      Tags:
-        - Key: costCenter
-          Value: !Ref CostCenter
-        - Key: uniqueID
-          Value: !Ref UniqueID
-        - Key: dataClassification
-          Value: !Ref DataClassification
-        - Key: supportGroup
-          Value: !Ref SupportGroup
-        - Key: changeGroup
-          Value: !Ref ChangeGroup
-        - Key: blockcode
-          Value: !Ref Blockcode
-        - Key: drTier
-          Value: !Ref DrTier
-        - Key: pciIndicator
-          Value: !Ref PciIndicator
-        - Key: phiIndicator
-          Value: !Ref PhiIndicator
-        - Key: soxIndicator
-          Value: !Ref SoxIndicator
-        - Key: cuiIndicator
-          Value: !Ref CuiIndicator
+  # #S3 Bucket for Logs
+  # S3LogsBucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Ref S3LogsBucketName
+  #     AccessControl: "LogDeliveryWrite"
+  #     LifecycleConfiguration:
+  #       Rules:
+  #         - Id: delete-old-logs
+  #           Prefix: pprmr-s3-logs/
+  #           Status: Enabled
+  #           ExpirationInDays: 1
+  #           NoncurrentVersionExpirationInDays: 1
+  #     Tags:
+  #       - Key: costCenter
+  #         Value: !Ref CostCenter
+  #       - Key: uniqueID
+  #         Value: !Ref UniqueID
+  #       - Key: dataClassification
+  #         Value: !Ref DataClassification
+  #       - Key: supportGroup
+  #         Value: !Ref SupportGroup
+  #       - Key: changeGroup
+  #         Value: !Ref ChangeGroup
+  #       - Key: blockcode
+  #         Value: !Ref Blockcode
+  #       - Key: drTier
+  #         Value: !Ref DrTier
+  #       - Key: pciIndicator
+  #         Value: !Ref PciIndicator
+  #       - Key: phiIndicator
+  #         Value: !Ref PhiIndicator
+  #       - Key: soxIndicator
+  #         Value: !Ref SoxIndicator
+  #       - Key: cuiIndicator
+  #         Value: !Ref CuiIndicator
 
   ##### Policies #####
   ApiGatewayAccessPolicy:
@@ -805,7 +831,7 @@ Resources:
   ApiGatewayLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/api-gateway/${GroupResourcePrefix}-${Environment}-${AppPrefix}-api"
+      LogGroupName: !Sub "${APIRestApiName}-loggrp"
 
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
@@ -813,19 +839,54 @@ Resources:
       - ApiGatewayGetBucketMethod
       - ApiGatewayGetPresignedUrlMethod
       - ApiGatewayS3BucketMethodOptions
+      - APIClientCertificate
     Properties:
       Description: API Deployment
       RestApiId: !Ref PprmrApiGateway
       StageName: !Sub "${Environment}"
-      # StageDescription:
-      #   Description: Deployment Stage
-      #   AccessLogSetting:
-      #     DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
-      #     Format: '{"apiId":"$context.apiId","stage":"$context.stage","resourcePath":"$context.resourcePath","requestId":"$context.requestId","awsEndpointRequestId":"$context.awsEndpointRequestId","xrayTraceId":"$context.xrayTraceId","requestTime":"$context.requestTime","requestTimeEpoch":$context.requestTimeEpoch,"httpMethod":"$context.httpMethod","status":"$context.status","path":"$context.path"}'
-      #   LoggingLevel: INFO
-      #   MetricsEnabled: true
-      #   DataTraceEnabled: true
-      #   TracingEnabled: true
+      # # LoggingLevel: INFO
+      # # MetricsEnabled: True
+      # MethodSettings:
+      #   - ResourcePath: "/*"
+      #     HttpMethod: "*"
+      #     LoggingLevel: INFO
+      #     MetricsEnabled: True
+      StageDescription:
+
+        AccessLogSetting:
+          DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
+          Format: '{"apiId":"$context.apiId","stage":"$context.stage","resourcePath":"$context.resourcePath","requestId":"$context.requestId","awsEndpointRequestId":"$context.awsEndpointRequestId","xrayTraceId":"$context.xrayTraceId","requestTime":"$context.requestTime","requestTimeEpoch":$context.requestTimeEpoch,"httpMethod":"$context.httpMethod","status":"$context.status","path":"$context.path"}'
+        MethodSettings:
+          - MetricsEnabled: True
+            ResourcePath: '/*'
+            HttpMethod: '*'
+        LoggingLevel: INFO
+        MetricsEnabled: true
+        DataTraceEnabled: true
+        TracingEnabled: true
+        ClientCertificateId: !Ref APIClientCertificate
+
+  ApiCWLRoleArn:
+    Type: AWS::ApiGateway::Account
+    Properties: 
+      CloudWatchRoleArn: !GetAtt PprmrApiGatewayRole.Arn
+
+  # IAM Role for API GW + CWL
+  # CloudWatchRole:
+  #     Type: "AWS::IAM::Role"
+  #     Properties:
+  #       PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+  #       RoleName: "techops-eng-dev-api-cw-role"
+  #       AssumeRolePolicyDocument:
+  #         Version: '2012-10-17'
+  #         Statement:
+  #           Action: 'sts:AssumeRole'
+  #           Effect: Allow
+  #           Principal:
+  #             Service: apigateway.amazonaws.com
+  #       Path: /
+  #       ManagedPolicyArns:
+  #         - 'arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs'
 
   #Get Bucket Contents Endpoint
   ApiGatewayGetBucketMethod:
@@ -1068,19 +1129,19 @@ Resources:
 
   #SPA
   # Configure the bucket as a CloudFront Origin
-  ReadPolicy:
-    Type: "AWS::S3::BucketPolicy"
-    DependsOn:
-      - CloudFrontOriginAccessIdentity
-    Properties:
-      Bucket: !Ref SPABucketName
-      PolicyDocument:
-        Statement:
-          - Action: "s3:GetObject"
-            Effect: Allow
-            Resource: !Sub "arn:aws:s3:::${SPABucketName}/*"
-            Principal:
-              CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+  # ReadPolicy:
+  #   Type: "AWS::S3::BucketPolicy"
+  #   DependsOn:
+  #     - CloudFrontOriginAccessIdentity
+  #   Properties:
+  #     Bucket: !Ref SPABucketName
+  #     PolicyDocument:
+  #       Statement:
+  #         - Action: "s3:GetObject"
+  #           Effect: Allow
+  #           Resource: !Sub "arn:aws:s3:::${SPABucketName}/*"
+  #           Principal:
+  #             CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
 
   CloudFrontOriginAccessIdentity:
     Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
@@ -1157,8 +1218,14 @@ Resources:
     #   - ViewerRequestLambdaAtEdgeFunction
     Properties:
       DistributionConfig:
+        WebACLId: !GetAtt AppWebACL.Arn
         PriceClass: "PriceClass_100"
         Enabled: "true"
+        Logging:
+            Bucket: !Sub ${S3LogsBucketName}.s3.amazonaws.com
+            IncludeCookies: false
+            Prefix: pprmr-cloudfront-logs/
+
         Aliases:
           - !Ref SPACustomUri
         ViewerCertificate:
@@ -1221,6 +1288,144 @@ Resources:
           Value: !Ref SoxIndicator
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
+  
+  AppWebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Ref SPAWebACLName
+      Scope: CLOUDFRONT
+      Description: PDF PW Remover Web App WAF
+      DefaultAction:
+        Allow:  {}
+      VisibilityConfig:
+        SampledRequestsEnabled: false
+        CloudWatchMetricsEnabled: true
+        MetricName: !Ref SPAWebACLName
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  APIWebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Ref APIWebACLName
+      Scope: REGIONAL
+      Description: PDF PW Remover API App WAF
+      DefaultAction:
+        Allow:  {}
+      VisibilityConfig:
+        SampledRequestsEnabled: false
+        CloudWatchMetricsEnabled: true
+        MetricName: !Ref APIWebACLName
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  APIWebACLAssoc:
+    Type: AWS::WAFv2::WebACLAssociation
+    DependsOn: 
+      - APIWebACL
+      - ApiGatewayDeployment
+    Properties: 
+      ResourceArn: !Sub arn:aws:apigateway:${AWS::Region}::/restapis/${PprmrApiGateway}/stages/${Environment}
+      WebACLArn: !GetAtt APIWebACL.Arn
+
+  APIClientCertificate:
+    Type: 'AWS::ApiGateway::ClientCertificate'
+    Properties:
+      Description: PDF PW Remover API Client Certificate
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+
+
+  # SPAWebACL: 
+  #   Type: "AWS::WAF::WebACL"
+  #   Properties: 
+  #     Name: !Ref SPAWebACLName
+  #     DefaultAction: 
+  #       Type: "ALLOW"
+  #     MetricName: !Ref SPAWebACLName
+      # Rules: 
+      #   - 
+      #     Action: 
+      #       Type: "BLOCK"
+      #     Priority: 1
+      #     RuleId: 
+      #       Ref: "MyRule"
+      #   - 
+      #     Action: 
+      #       Type: "BLOCK"
+      #     Priority: 2
+      #     RuleId: 
+      #       Ref: "BadReferersRule"
+      #   - 
+      #     Action: 
+      #       Type: "BLOCK"
+      #     Priority: 3
+      #     RuleId: 
+      #       Ref: "SqlInjRule"
 
 Outputs:
   UploadedFilesS3Bucket:
@@ -1229,11 +1434,11 @@ Outputs:
 
   ConvertedFilesS3Bucket:
     Description: S3 Bucket for converted PDF files
-    Value: !Sub "${S3LogsBucketName}"
+    Value: !Sub "${ConvertedFilesBucketName}"
 
   S3LogsS3Bucket:
     Description: S3 Bucket for S3 Logs
-    Value: !Sub "${ConvertedFilesBucketName}"
+    Value: !Sub "${S3LogsBucketName}"
 
   PdfPwRemoverLambdaFunc:
     Description: PDF Pw Remover Lambda Function that removes pw permission from PDF

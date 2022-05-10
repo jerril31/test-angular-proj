@@ -33,7 +33,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   setUserName() {
-    this.userName = 'User';
+    this.userName = AppConstant.USER_NAME;
   }
 
   ngOnInit(): void {
