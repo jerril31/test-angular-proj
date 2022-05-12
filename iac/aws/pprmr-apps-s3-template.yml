@@ -31,6 +31,7 @@ Metadata:
           - PprmrLambdaCodeBucket
           - SPABucketName
           - S3LogsBucketName
+          - S3LogsBucketACL
           - EmailRecipient
           - TopicName
 
@@ -180,6 +181,14 @@ Parameters:
     Default: "techops-eng-dev-pprmr-s3-topic"
     Description: "S3 Bucket Event Notif Topic"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]topic$
+
+  S3LogsBucketACL:
+    Type: String
+    Description: S3 Log Bucket Canned Access Control List 
+    Default: "LogDeliveryWrite"
+    AllowedValues:
+      - LogDeliveryWrite
+      - Private
   
 Resources:
   #####S3 Buckets#####
@@ -188,7 +197,12 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref S3LogsBucketName
-      #AccessControl: "LogDeliveryWrite"
+      AccessControl: !Ref S3LogsBucketACL
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls : true
+        BlockPublicPolicy : true
+        IgnorePublicAcls : true
+        RestrictPublicBuckets : true
       LifecycleConfiguration:
         Rules:
           - Id: delete-s3-old-logs
@@ -205,7 +219,10 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: 'aws:kms'
-      
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Topic: !Ref Topic
+            Event: s3:ObjectTagging:*
       Tags:
         - Key: costCenter
           Value: !Ref CostCenter
@@ -397,10 +414,10 @@ Resources:
         BlockPublicPolicy : true
         IgnorePublicAcls : true
         RestrictPublicBuckets : true
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: 'aws:kms'
+      # BucketEncryption:
+      #   ServerSideEncryptionConfiguration:
+      #     - ServerSideEncryptionByDefault:
+      #         SSEAlgorithm: 'aws:kms'
       NotificationConfiguration:
         TopicConfigurations:
           - Topic: !Ref Topic

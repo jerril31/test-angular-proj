@@ -46,9 +46,11 @@ Metadata:
           - APIRestApiName
           - APICustomUri
           - APIEndpointType
+          - APICustomDomainEndpointType
           - APICustomRoute53
           - APIHostedZoneId
           - CertificateAuthorityArnValue
+          - APIWebACLName
       - Label:
           default: Lambda Function Configurations
         Parameters:
@@ -67,6 +69,11 @@ Metadata:
           - SPABucketName
           - SPACustomUri
           - SPAHostedZoneId
+          - SPAWebACLName
+      - Label:
+          default: Notification Configurations
+        Parameters:
+          - TopicName
 
 Parameters:
   # Prompt for Blockcode
@@ -231,12 +238,21 @@ Parameters:
 
   APIEndpointType:
     Type: String
-    Description: "The name of the EndpointType for the custom domain values are Regional, Edge, Private"
+    Description: "The name of the EndpointType for the API Gateway values are Regional, Edge, Private"
     Default: "REGIONAL"
     AllowedValues:
       - REGIONAL
       - PRIVATE
       - EDGE
+
+  APICustomDomainEndpointType:
+    Type: String
+    Description: "The name of the EndpointType for the custom domain values are Regional, Edge"
+    Default: "REGIONAL"
+    AllowedValues:
+      - REGIONAL
+      - EDGE
+  
 
   CertificateAuthorityArnValue:
     # Type : 'AWS::SSM::Parameter::Value<String>'
@@ -366,7 +382,6 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: 'aws:kms'
-      #TODO Uncomment
       LoggingConfiguration:
         DestinationBucketName: !Ref S3LogsBucketName
         LogFilePrefix: pprmr-s3-logs/uploaded-files-logs/
@@ -416,7 +431,6 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref ConvertedFilesBucketName
-      #TODO Uncomment
       LoggingConfiguration:
         DestinationBucketName: !Ref S3LogsBucketName
         LogFilePrefix: pprmr-s3-logs/converted-files-logs/
@@ -424,6 +438,10 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: 'aws:kms'
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Topic: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${TopicName}
+            Event: s3:ObjectTagging:*
       LifecycleConfiguration:
         Rules:
           - Id: delete-expired-error-files
@@ -1048,7 +1066,7 @@ Resources:
       DomainName: !Ref APICustomUri
       EndpointConfiguration:
         Types:
-          - !Ref APIEndpointType
+          - !Ref APICustomDomainEndpointType
       RegionalCertificateArn: !Ref APICustomCertificate
       SecurityPolicy: TLS_1_2
       Tags:
@@ -1129,19 +1147,27 @@ Resources:
 
   #SPA
   # Configure the bucket as a CloudFront Origin
-  # ReadPolicy:
-  #   Type: "AWS::S3::BucketPolicy"
-  #   DependsOn:
-  #     - CloudFrontOriginAccessIdentity
-  #   Properties:
-  #     Bucket: !Ref SPABucketName
-  #     PolicyDocument:
-  #       Statement:
-  #         - Action: "s3:GetObject"
-  #           Effect: Allow
-  #           Resource: !Sub "arn:aws:s3:::${SPABucketName}/*"
-  #           Principal:
-  #             CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+  ReadPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    DependsOn:
+      - CloudFrontOriginAccessIdentity
+    Properties:
+      Bucket: !Ref SPABucketName
+      PolicyDocument:
+        Statement:
+          - Action: "s3:GetObject"
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${SPABucketName}/*"
+            Principal:
+              CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+          - Effect: Deny
+            Principal: "*"
+            Resource: !Sub "arn:aws:s3:::${SPABucketName}"
+            Action: "s3:*"
+            Condition:
+              Bool:
+                "aws:SecureTransport": false
+
 
   CloudFrontOriginAccessIdentity:
     Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
