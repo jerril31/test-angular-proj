@@ -45,6 +45,12 @@
                   "maximumError": "4kb"
                 }
               ],
+              "optimization": {
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                }
+              },
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -62,6 +68,12 @@
               "namedChunks": true
             },
             "dev": {
+              "optimization": {
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                }
+              },
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -70,6 +82,12 @@
               ]
             },
             "si": {
+              "optimization": {
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                }
+              },
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",

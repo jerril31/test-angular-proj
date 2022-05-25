@@ -70,6 +70,9 @@ Metadata:
           - SPACustomUri
           - SPAHostedZoneId
           - SPAWebACLName
+          - SPACloudfrontHeaderPolicyConfig
+          - SPACloudfrontContentSecurityPolicy
+          - SPACloudfrontOriginHeaderPolicyOverride
       - Label:
           default: Notification Configurations
         Parameters:
@@ -343,6 +346,26 @@ Parameters:
     Default: "pdfpwdrmr.tech-eng-doc-dev.pub.delta.com"
     #Default: "tech-eng-doc-dev.aws.delta.com"
 
+  SPACloudfrontHeaderPolicyConfig:
+    Type: String
+    Default: "techops-eng-dev-pprmr-spa-res-header-policy"
+    Description: "Name for Cloudfront Response Header Policy"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]policy$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  SPACloudfrontContentSecurityPolicy:
+    Type: String
+    Description: "Content Security Policy to be set on the response header of the SPA for Security. (ex.script-src 'self'; font-src 'self';  style-src 'self' )."
+    Default: "default-src 'none'; script-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' https://*.delta.com https://*.amazonaws.com;   style-src 'self' 'unsafe-inline'; trusted-types angular angular#unsafe-bypass; object-src 'none'"
+
+  SPACloudfrontOriginHeaderPolicyOverride:
+    Type: String
+    AllowedValues: [true, false]
+    Description: "Allow Cloudfront to override Header Policy from origin."
+    Default: true
+    
+
+   
   TopicName:
     Type: String
     Default: "techops-eng-dev-pprmr-s3-topic"
@@ -1186,6 +1209,35 @@ Resources:
       TTL: 900
       Type: CNAME
 
+  CloudFrontResponseHeadersPolicy:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties: 
+      ResponseHeadersPolicyConfig:
+        Name: !Ref SPACloudfrontHeaderPolicyConfig 
+        CustomHeadersConfig: 
+          Items: 
+            - Header: "Server"
+              Value: ""
+              Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
+        SecurityHeadersConfig: 
+          ContentTypeOptions: 
+            Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
+          FrameOptions: 
+            FrameOption: "DENY"
+            Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
+          StrictTransportSecurity: 
+            AccessControlMaxAgeSec: 31536000
+            Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
+          XSSProtection: 
+            Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
+            Protection: true
+          ContentSecurityPolicy:
+            ContentSecurityPolicy: !Ref SPACloudfrontContentSecurityPolicy
+            Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
+
+
+
+
   CloudFrontCachePolicy:
     Type: AWS::CloudFront::CachePolicy
     Properties:
@@ -1241,6 +1293,7 @@ Resources:
     Type: AWS::CloudFront::Distribution
     DependsOn:
       - DomainCertificate
+      - CloudFrontResponseHeadersPolicy
     #   - ViewerRequestLambdaAtEdgeFunction
     Properties:
       DistributionConfig:
@@ -1282,7 +1335,8 @@ Resources:
           #     LambdaFunctionARN: !Ref ViewerRequestLambdaFunctionVersion
           CachePolicyId: !Ref CloudFrontCachePolicy
           # OriginRequestPolicyId: !Ref CloudFrontOriginRequestPolicy
-          ViewerProtocolPolicy: "https-only"
+          ViewerProtocolPolicy: "redirect-to-https"
+          ResponseHeadersPolicyId: !Ref CloudFrontResponseHeadersPolicy
           AllowedMethods:
             - GET
             - HEAD
