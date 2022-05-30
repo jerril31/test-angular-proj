@@ -73,6 +73,17 @@ Metadata:
           - SPACloudfrontHeaderPolicyConfig
           - SPACloudfrontContentSecurityPolicy
           - SPACloudfrontOriginHeaderPolicyOverride
+
+      - Label:
+          default: Lambda@Edge Configurations
+        Parameters:
+          - LambdaAtEdgeCodeBucket
+          - LambdaAtEdgeCodeArtifact
+          - LambdaAtEdgeFunctionName
+          - LambdaAtEdgeRoleName
+          - SecretName
+          - PublicKey
+          - PrivateKey
       - Label:
           default: Notification Configurations
         Parameters:
@@ -356,7 +367,7 @@ Parameters:
   SPACloudfrontContentSecurityPolicy:
     Type: String
     Description: "Content Security Policy to be set on the response header of the SPA for Security. (ex.script-src 'self'; font-src 'self';  style-src 'self' )."
-    Default: "default-src 'none'; script-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' https://*.delta.com https://*.amazonaws.com;   style-src 'self' 'unsafe-inline'; trusted-types angular angular#unsafe-bypass; object-src 'none'"
+    Default: "default-src 'none'; script-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' https://*.delta.com https://*.amazonaws.com;   style-src 'self' 'unsafe-inline'; object-src 'none'"
 
   SPACloudfrontOriginHeaderPolicyOverride:
     Type: String
@@ -383,6 +394,47 @@ Parameters:
     Default: "techops-eng-dev-pprmr-api-waf"
     Description: "API Web ACL"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]waf$
+
+  LambdaAtEdgeCodeBucket:
+    Type: String
+    Default: "techops-eng-dev-pprmr-lambda-edge-s3"
+    Description: "S3 bucket that contains lambda function java project"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  LambdaAtEdgeCodeArtifact:
+    Type: String
+    Default: "lambda-at-edge-code.zip"
+    Description: "S3 bucket file that contains lambda at edge codes"
+  
+  LambdaAtEdgeFunctionName:
+    Type: String
+    Description: Enter the Lambda At Edge function name
+    Default: techops-eng-dev-pprmr-lambda-at-edge-lambda
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
+
+  LambdaAtEdgeRoleName:
+    Type: String
+    Description: Enter the Lambda role name
+    Default: delegate-admin-techops-eng-dev-pprmr-lambda-at-edge-role
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]role$
+    MaxLength: 64
+
+  SecretName:
+    Type: String
+    Description: 'Name of the secrets used in viewer request'  
+    Default: "techops-eng-dev-pprmr-lambda-edge-secret"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]secret$
+
+  PublicKey:
+    Type: String
+    Default: "-----BEGIN PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwwEGGNmy9gRxAPd964wI\\nUPDNnd6agaoiCMnnrQO+oVrVfP3LcZC9WmrSL2y1dVCJd/HQatB4+8jsGCKvJp6q\\nO4kQ/wd8mhAeKDT6kwVoERjXJsiVIv/xCXP0D/U5TAhbuasUq1f14rmiGIZhfCVD\\ntbpc7R+qbAm7kAWnqIdR92XhN3VirknhmaHgpJCW8MNEOj4z3CdIecd8elY2D71B\\n59z9CCyEeLDJENVuqknPukVrDF6ISDieK1dro2UaaFC7hY0rpuAWGkJkcSBGPeLp\\nNQFPRMrOyt/+fp27XR6HuBBPS5ah/1FXbtNpK7jI1AS9LxdE7O1ZnY00AJPvyiZ7\\n1QIDAQAB\\n-----END PUBLIC KEY-----\\n"
+    Description: 'Public key value used to sign synthetic TOKEN'  
+
+  PrivateKey:
+    Type: String
+    Default: "-----BEGIN PRIVATE KEY-----\\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDDAQYY2bL2BHEA\\n933rjAhQ8M2d3pqBqiIIyeetA76hWtV8/ctxkL1aatIvbLV1UIl38dBq0Hj7yOwY\\nIq8mnqo7iRD/B3yaEB4oNPqTBWgRGNcmyJUi//EJc/QP9TlMCFu5qxSrV/XiuaIY\\nhmF8JUO1ulztH6psCbuQBaeoh1H3ZeE3dWKuSeGZoeCkkJbww0Q6PjPcJ0h5x3x6\\nVjYPvUHn3P0ILIR4sMkQ1W6qSc+6RWsMXohIOJ4rV2ujZRpoULuFjSum4BYaQmRx\\nIEY94uk1AU9Eys7K3/5+nbtdHoe4EE9LlqH/UVdu02kruMjUBL0vF0Ts7VmdjTQA\\nk+/KJnvVAgMBAAECggEAWfFa8pNW7ApYZO3CcqaAH3UyIaLO+QeT8yHNbgvQHXRc\\nC+6zq4nrDI1ArQcjGx0uithKHTpS0y91VhyJVPLR6evqnvbBDf5pKnplKPLRcTFX\\n61eREjei4Y1OAR5Gcz9Xr2etfOpxS0X78fvpcu1tMaDnw6dbX8GNdXxmPGFN+SGA\\nwVYUCTSparT2zJqYlv7ZDrnH4RPg/r+oGfTuxPaKFmpqXTK90ko0V9B29g0nDwqk\\niAudmiFO4F64KnRKGCDv3QapVzEngy39MLPP7ITxjDC6DAtVgCheFT8gE7BJeWMj\\nnMD9+dgM7EnnYuUZKxtvP9QyGdoHB4eZf8ibB1QigQKBgQD+uL57Zvh+bhl1Lakk\\nH8cWcbpR0lWT75lw57NVPnVdNpVbjvqh98FQITXgbUBTtTGcftr2Myrj+OtclCvS\\nCLUdEhY3UtYFYy8IkSTodrMfAEQD08ATgY3eisxUDVaSCH50sEVD+P7ZYJKEiwM1\\nKY5v5M1UVg7ghUsgni1HpfmmPQKBgQDD+46UW0PQmC/A/N8SMFm1rhFk8cTzSh10\\nrQz4pmqxIBVi38L7xC3IHug60JDGejSriUc5R15X6KkqlzKawY0ewZhNVqBq2yQF\\nzrJbxs6DxLn9YpCylalEulqw98S7TbJ3yqvTniMCRTXI18DkDTSHZMAmd/B0IrzD\\n818207odeQKBgQDRYiuyZMJ/qyFiIVaYS0bsPDBccfnG0X3gQZY4zE7NgMDlsnJ0\\nEaTmqWYQRb5LEPbnHaAAIa9wFn3ibCpZTK8UZnm8oGstoopXEHi2Xlx/b0h5nOaX\\nIjfsZ0vvC8fN4w2P/hXx+gwDxE6shVjtqmtbr0jZuqQgC3HmLiAqdVTyQQKBgA2i\\nHz4Ex0foflHvhVkPkf4IeN9LzkaaXkgyjZdyhDOEJti09ixrbj/gnokQ3zFfaPCR\\n4SmD5HU7EyGKWRPY6Qc9smmW4Bvu2KeqxE+MGeuisMmGpMg3jwnf6NUstzvMYODi\\ncWeMNaU/yUkKcTmsDX5prNBAQbLig70h3frDacwJAoGAdlP8J6qIfRYfkTo/hoH0\\n6e0klEHkdw6kiYMLwA1UHKxjs3PUuYrQ4mCdBMsKK+MEA8FRgQRqX+k0KlJTuCpR\\njQlV3xfwqtBE6Cc3rT3KVEm2q6haFSfo0bpFQkgRxRHNW8J4I1I/Kl2CI627D/wo\\nM4vQXImU5Ti5yDsumI9eg54=\\n-----END PRIVATE KEY-----\\n"
+    Description: 'Private key value used to sign synthetic TOKEN'    
 
 Resources:
   #####S3 Buckets#####
@@ -1289,12 +1341,132 @@ Resources:
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
 
+  LambdaEdgeFunctionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Ref LambdaAtEdgeRoleName 
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub "arn:aws:s3:::${LambdaAtEdgeCodeBucket}/*"
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: arn:aws:secretsmanager:*:*:*  
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Sid: "AllowLambdaServiceToAssumeRole"
+            Effect: "Allow"
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+                - "edgelambda.amazonaws.com"
+
+  ViewerRequestLambdaAtEdgeFunction:
+    DependsOn:
+      - LambdaEdgeFunctionRole
+      - LambdaAtEdgeSecret
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaAtEdgeFunctionName
+      Description: Lambda@Edge triggered by viewer request in Cloudfront distribution
+      Handler: src/viewer_request.handler
+      Runtime: nodejs12.x
+      Role: !GetAtt LambdaEdgeFunctionRole.Arn
+      Timeout: 5
+      Code:
+        S3Bucket: !Ref LambdaAtEdgeCodeBucket
+        S3Key: !Ref LambdaAtEdgeCodeArtifact
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  ViewerRequestLambdaFunctionVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref ViewerRequestLambdaAtEdgeFunction
+      Description: Newly deployed version
+        
+  LambdaAtEdgeSecret: 
+    Type: "AWS::SecretsManager::Secret"
+    Properties: 
+      Name: !Ref SecretName
+      Description: "This secret is used by the request viewer lambda@edge function"
+      SecretString: !Sub |-
+        {
+          "PUBLIC_KEY": "${PublicKey}",
+          "PRIVATE_KEY": "${PrivateKey}"
+        }
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
   CFDistribution:
     Type: AWS::CloudFront::Distribution
     DependsOn:
       - DomainCertificate
       - CloudFrontResponseHeadersPolicy
-    #   - ViewerRequestLambdaAtEdgeFunction
+      # - LambdaAtEdgePermission
+      - ViewerRequestLambdaFunctionVersion
     Properties:
       DistributionConfig:
         WebACLId: !GetAtt AppWebACL.Arn
@@ -1329,10 +1501,11 @@ Resources:
             ResponseCode: 404
         DefaultCacheBehavior:
           TargetOriginId: myS3Origin
-          # LambdaFunctionAssociations:
-          #   -
-          #     EventType: viewer-request
-          #     LambdaFunctionARN: !Ref ViewerRequestLambdaFunctionVersion
+          LambdaFunctionAssociations:
+            -
+              EventType: viewer-request
+              #LambdaFunctionARN: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaAtEdgeFunctionName}:1
+              LambdaFunctionARN: !Ref ViewerRequestLambdaFunctionVersion
           CachePolicyId: !Ref CloudFrontCachePolicy
           # OriginRequestPolicyId: !Ref CloudFrontOriginRequestPolicy
           ViewerProtocolPolicy: "redirect-to-https"
