@@ -25,6 +25,7 @@
     "@types/file-saver": "^2.0.5",
     "angular-oauth2-oidc": "^13.0.1",
     "file-saver": "^2.0.5",
+    "ngx-cookie-service": "^13.2.1",
     "primeicons": "^5.0.0",
     "primeng": "^13.1.0",
     "rxjs": "~7.4.0",

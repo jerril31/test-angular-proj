@@ -13,7 +13,7 @@ export const authCodeFlowConfig: AuthConfig = {
 
   // The SPA's id. The SPA is registerd with this id at the auth-server
   // clientId: 'server.code',
-  clientId: 'cld_ccoe_oidc_test_client',
+  clientId: 'TOPEGDRPPO_OEMPDFPasswordRemoverAWS_OIDC_SI',
 
   // Just needed if your auth server demands a secret. In general, this
   // is a sign that the auth server is not configured with SPAs in mind

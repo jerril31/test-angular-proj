@@ -15,6 +15,11 @@ const routes: Routes = [
     path: AppConstant.URL_UPLOAD_FILES,
     component: UploadFilesComponent,
   },
+  {
+    //Callback after OIDC
+    path: AppConstant.URL_CALLBACK,
+    component: UploadFilesComponent
+  },
   { path: '', redirectTo: '/upload', pathMatch: 'full' },
 ];
 

@@ -171,6 +171,14 @@ Parameters:
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
+  LambdAtEdgeCodeBucketName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-lambda-edge-s3"
+    Description: "S3 bucket that contains lambda function java project"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+
   EmailRecipient:
     Type: String
     Default: "jerril.villalon@delta.com"
@@ -215,10 +223,12 @@ Resources:
             Status: Enabled
             ExpirationInDays: 5
             NoncurrentVersionExpirationInDays: 1
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: 'aws:kms'
+      #TODO: Ucomment
+      # BucketEncryption:
+      #   ServerSideEncryptionConfiguration:
+      #     - ServerSideEncryptionByDefault:
+      #         KMSMasterKeyID: 'techops-eng-dev-pprmr-kms-key'
+      #         SSEAlgorithm: 'aws:kms'
       NotificationConfiguration:
         TopicConfigurations:
           - Topic: !Ref Topic
@@ -247,6 +257,24 @@ Resources:
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
 
+  # PprmrKey:
+  #   Type: 'AWS::KMS::Key'
+  #   Properties:
+  #     Description: An example symmetric encryption KMS key
+  #     EnableKeyRotation: true
+  #     PendingWindowInDays: 20
+  #     KeyPolicy:
+  #       Version: 2012-10-17
+  #       Id: techops-eng-dev-pprmr-kms-key
+  #       Statement:
+          
+  #         - Sid: Allow administration of the key
+  #           Effect: Allow
+  #           Principal:
+  #             AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+  #           Action: 'kms:*'
+  #           Resource: '*'
+         
 
   Topic:
     Type: AWS::SNS::Topic
@@ -325,6 +353,14 @@ Resources:
             Condition:
               Bool:
                 "aws:SecureTransport": false
+          # - Sid: "AllowCloudFrontToUsekeyToDeliverLogs"
+          #   Effect: Allow
+          #   Principal:
+          #     Service: 
+          #       - "delivery.logs.amazonaws.com"
+          #   Action: 
+          #     - "kms:GenerateDataKey*"
+          #   Resource: "*"
   
   LambdaCodeS3BucketPolicy:
     Type: "AWS::S3::BucketPolicy"
@@ -423,6 +459,52 @@ Resources:
           - Topic: !Ref Topic
             Event: s3:ObjectRemoved:*
 
+
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  #S3 Bucket for Lambda At Edge Function
+  LambdaAtEdgeCodeS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref LambdAtEdgeCodeBucketName
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3LogsBucket
+        LogFilePrefix: pprmr-s3-logs/lambdaatedge-code-bucket-logs/
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls : true
+        BlockPublicPolicy : true
+        IgnorePublicAcls : true
+        RestrictPublicBuckets : true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Topic: !Ref Topic
+            Event: s3:ObjectRemoved:*
 
       Tags:
         - Key: costCenter
