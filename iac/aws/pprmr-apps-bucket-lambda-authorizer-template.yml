@@ -1,0 +1,220 @@
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CF configurations for PDF Permission Remover S3 App Buckets.
+
+Metadata:
+  "AWS::CloudFormation::Interface":
+    ParameterGroups:
+      - Label:
+          default: Required Tags
+        Parameters:
+          - Blockcode
+          - CostCenter
+          - UniqueID
+          - DataClassification
+          - SupportGroup
+          - ChangeGroup
+          - DrTier
+          - PciIndicator
+          - PhiIndicator
+          - SoxIndicator
+          - CuiIndicator
+      - Label:
+          default: Application Configurations
+        Parameters:
+          - AppPrefix
+          - GroupResourcePrefix
+          - Environment
+      - Label:
+          default: S3 Configurations
+        Parameters:
+          - PprmrLambdaCodeBucket
+          - SPABucketName
+          - S3LogsBucketName
+          - S3LogsBucketACL
+          - EmailRecipient
+          - TopicName
+
+
+Parameters:
+  # Prompt for Blockcode
+  Blockcode:
+    Type: String
+    Description: Enter the block code for the Application
+    AllowedPattern: ^[A-Z]{10}$
+    Default: TOPEGDRPPO
+
+  # Prompt for CostCenter
+  CostCenter:
+    Type: String
+    Description: Enter the cost center for the Application
+    AllowedPattern: ^C[0-9]{4}ATG$
+    Default: C8730ATG
+
+  # Prompt for UniqueID
+  UniqueID:
+    Type: String
+    Description: Enter the unique id for the Application
+    AllowedPattern: ^(D|A)[0-9]{7}$
+    Default: D0021487
+
+  # Prompt for DataClassification
+  DataClassification:
+    Type: String
+    Description: Enter the data classification for the Application
+    AllowedValues:
+      - public
+      - internal
+      - confidential
+      - restricted
+    Default: confidential
+
+  # Prompt for cuiIndicator
+  CuiIndicator:
+    Type: String
+    Description: Refers to the category of unclassified information within the U.S. Federal government. Confidential.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for pciIndicator
+  PciIndicator:
+    Type: String
+    Description: Refers to the category used for credit cardholder data and sensitive authentication data.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for phiIndicator
+  PhiIndicator:
+    Type: String
+    Description: Refers to any health information (medical and insurance) related to an individual.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for soxIndicator
+  SoxIndicator:
+    Type: String
+    Description: Refers to any information that has a direct and material impact on Delta's financial reporting.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for DrTier
+  DrTier:
+    Type: String
+    Description: A tier designation, which defines the chronological order of recovery for an application during an IT Disaster event
+    AllowedValues:
+      - mission vital
+      - mission critical
+      - business critical
+      - business essential
+      - business
+    Default: business essential
+
+  # Prompt for SupportGroup
+  SupportGroup:
+    Type: String
+    Description: Enter the support group for the Application
+    AllowedPattern: ^[A-Za-z0-9_ -]+$
+    Default: DN - MEMDS2
+
+  # Prompt for ChangeGroup
+  ChangeGroup:
+    Type: String
+    Description: Enter the change group for the Application
+    AllowedPattern: ^[A-Za-z0-9_ -]+$
+    Default: DN - MEMDS2
+
+  GroupResourcePrefix:
+    Type: String
+    Default: "techops-eng"
+    Description: "Prefix to use in naming resources to be created by this template"
+
+  AppPrefix:
+    Type: String
+    Default: "pprmr"
+    Description: "App Prefix to use in naming resources to be created by this template"
+
+  Environment:
+    Description: Environment to deploy.
+    Type: String
+    Default: dev
+    AllowedValues: ["dev", "si", "prd"]
+    ConstraintDescription: Must specify dev, si or prd.
+
+  
+  PprmrLambdaAuthorizerCodeBucketName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-lambda-authz-s3"
+    Description: "S3 bucket that contains lambda API authorizer"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  S3LogsBucketName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-logs-s3"
+    Description: "S3 bucket to host S3 logs"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+ 
+  TopicName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-s3-topic"
+    Description: "S3 Bucket Event Notif Topic"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]topic$
+  
+  
+Resources:
+ 
+  #S3 Bucket for Lambda Function
+  PprmrLambdaAuthorizerCodeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref PprmrLambdaAuthorizerCodeBucketName
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3LogsBucketName
+        LogFilePrefix: pprmr-s3-logs/lambdaauthz-bucket-logs/
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls : true
+        BlockPublicPolicy : true
+        IgnorePublicAcls : true
+        RestrictPublicBuckets : true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Topic: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${TopicName}
+            Event: s3:ObjectRemoved:*
+
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  
+Outputs:
+  PprmrLambdaAuthorizerCodeBucket:
+    Description: S3 Bucket for API Gateway Lambda Authorizer Function
+    Value: !Sub "${PprmrLambdaAuthorizerCodeBucketName}"
+
+ 
+  

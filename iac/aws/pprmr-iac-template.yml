@@ -51,6 +51,9 @@ Metadata:
           - APIHostedZoneId
           - CertificateAuthorityArnValue
           - APIWebACLName
+          - LambdaAuthzFunctionName
+          - ApiBucketAuthorizerName
+          - ApiPresignedAuthorizerName
       - Label:
           default: Lambda Function Configurations
         Parameters:
@@ -367,7 +370,7 @@ Parameters:
   SPACloudfrontContentSecurityPolicy:
     Type: String
     Description: "Content Security Policy to be set on the response header of the SPA for Security. (ex.script-src 'self'; font-src 'self';  style-src 'self' )."
-    Default: "default-src 'none'; script-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' https://*.delta.com https://*.amazonaws.com;   style-src 'self' 'unsafe-inline'; object-src 'none'"
+    Default: "default-src 'none'; script-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' https://*.delta.com https://*.amazonaws.com; frame-src 'self' https://*.delta.com;  style-src 'self' 'unsafe-inline'; object-src 'none'"
 
   SPACloudfrontOriginHeaderPolicyOverride:
     Type: String
@@ -435,6 +438,25 @@ Parameters:
     Type: String
     Default: "-----BEGIN PRIVATE KEY-----\\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDDAQYY2bL2BHEA\\n933rjAhQ8M2d3pqBqiIIyeetA76hWtV8/ctxkL1aatIvbLV1UIl38dBq0Hj7yOwY\\nIq8mnqo7iRD/B3yaEB4oNPqTBWgRGNcmyJUi//EJc/QP9TlMCFu5qxSrV/XiuaIY\\nhmF8JUO1ulztH6psCbuQBaeoh1H3ZeE3dWKuSeGZoeCkkJbww0Q6PjPcJ0h5x3x6\\nVjYPvUHn3P0ILIR4sMkQ1W6qSc+6RWsMXohIOJ4rV2ujZRpoULuFjSum4BYaQmRx\\nIEY94uk1AU9Eys7K3/5+nbtdHoe4EE9LlqH/UVdu02kruMjUBL0vF0Ts7VmdjTQA\\nk+/KJnvVAgMBAAECggEAWfFa8pNW7ApYZO3CcqaAH3UyIaLO+QeT8yHNbgvQHXRc\\nC+6zq4nrDI1ArQcjGx0uithKHTpS0y91VhyJVPLR6evqnvbBDf5pKnplKPLRcTFX\\n61eREjei4Y1OAR5Gcz9Xr2etfOpxS0X78fvpcu1tMaDnw6dbX8GNdXxmPGFN+SGA\\nwVYUCTSparT2zJqYlv7ZDrnH4RPg/r+oGfTuxPaKFmpqXTK90ko0V9B29g0nDwqk\\niAudmiFO4F64KnRKGCDv3QapVzEngy39MLPP7ITxjDC6DAtVgCheFT8gE7BJeWMj\\nnMD9+dgM7EnnYuUZKxtvP9QyGdoHB4eZf8ibB1QigQKBgQD+uL57Zvh+bhl1Lakk\\nH8cWcbpR0lWT75lw57NVPnVdNpVbjvqh98FQITXgbUBTtTGcftr2Myrj+OtclCvS\\nCLUdEhY3UtYFYy8IkSTodrMfAEQD08ATgY3eisxUDVaSCH50sEVD+P7ZYJKEiwM1\\nKY5v5M1UVg7ghUsgni1HpfmmPQKBgQDD+46UW0PQmC/A/N8SMFm1rhFk8cTzSh10\\nrQz4pmqxIBVi38L7xC3IHug60JDGejSriUc5R15X6KkqlzKawY0ewZhNVqBq2yQF\\nzrJbxs6DxLn9YpCylalEulqw98S7TbJ3yqvTniMCRTXI18DkDTSHZMAmd/B0IrzD\\n818207odeQKBgQDRYiuyZMJ/qyFiIVaYS0bsPDBccfnG0X3gQZY4zE7NgMDlsnJ0\\nEaTmqWYQRb5LEPbnHaAAIa9wFn3ibCpZTK8UZnm8oGstoopXEHi2Xlx/b0h5nOaX\\nIjfsZ0vvC8fN4w2P/hXx+gwDxE6shVjtqmtbr0jZuqQgC3HmLiAqdVTyQQKBgA2i\\nHz4Ex0foflHvhVkPkf4IeN9LzkaaXkgyjZdyhDOEJti09ixrbj/gnokQ3zFfaPCR\\n4SmD5HU7EyGKWRPY6Qc9smmW4Bvu2KeqxE+MGeuisMmGpMg3jwnf6NUstzvMYODi\\ncWeMNaU/yUkKcTmsDX5prNBAQbLig70h3frDacwJAoGAdlP8J6qIfRYfkTo/hoH0\\n6e0klEHkdw6kiYMLwA1UHKxjs3PUuYrQ4mCdBMsKK+MEA8FRgQRqX+k0KlJTuCpR\\njQlV3xfwqtBE6Cc3rT3KVEm2q6haFSfo0bpFQkgRxRHNW8J4I1I/Kl2CI627D/wo\\nM4vQXImU5Ti5yDsumI9eg54=\\n-----END PRIVATE KEY-----\\n"
     Description: 'Private key value used to sign synthetic TOKEN'    
+
+  LambdaAuthzFunctionName:
+    Type: String
+    Description: Enter the API GW Lambda Authorizer function name
+    Default: techops-eng-dev-pprmr-lambda-authz-lambda
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
+
+
+  ApiPresignedAuthorizerName:
+    Type: String
+    Description: Enter Authorizer Name for the API Gateway Presigned Method Authorizer
+    Default: techops-eng-dev-pprmr-ping-signature-presigned-authorizer
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]authorizer$
+
+  ApiBucketAuthorizerName:
+    Type: String
+    Description: Enter Authorizer Name for the API Gateway Bucket Method Authorizer
+    Default: techops-eng-dev-pprmr-ping-signature-bucket-authorizer
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]authorizer$
 
 Resources:
   #####S3 Buckets#####
@@ -638,6 +660,7 @@ Resources:
               - Fn::Sub: arn:aws:s3:::${ConvertedFilesBucketName}
               - Fn::Sub: arn:aws:s3:::${ConvertedFilesBucketName}/*
 
+  ##################PDF PW Remover LAMBDA###################
   LambdaAccessPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -685,7 +708,16 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PprmrApiGateway}/*/GET/s3/*/*
 
-  #### Roles #####
+  ApiGatewayPresignedInvokeLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt PprmrPresgnUrlFunction.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PprmrApiGateway}/*/GET/s3/*
+
+
+   ################## ROLES ##################
   PprmrLambdaFunctionRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -812,6 +844,8 @@ Resources:
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
 
+
+   ##################PDF PW Remover PRESIGNED LAMBDA##################
   PprmrPresgnUrlFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -849,7 +883,7 @@ Resources:
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
 
-  #### API Gateway ####
+   ##################  API GATEWAY ##################
   PprmrApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
@@ -884,6 +918,46 @@ Resources:
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
 
+  #API GW Presigned Authorizer
+  ApiPresignedAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties: 
+      AuthorizerUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}/invocations"
+      RestApiId: !Ref PprmrApiGateway
+      Type: "TOKEN"
+      IdentitySource: method.request.header.Authorization
+      Name: !Sub "${ApiPresignedAuthorizerName}"
+
+
+   #API GW Get Bucket Authorizer
+  ApiBucketAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties: 
+      AuthorizerUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}/invocations"
+      RestApiId: !Ref PprmrApiGateway
+      Type: "TOKEN"
+      IdentitySource: method.request.header.Authorization
+      Name: !Sub "${ApiBucketAuthorizerName}"
+
+  #AUthorizer Permissions
+  ApiBucketAuthorizerPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Sub "arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PprmrApiGateway}/authorizers/${ApiBucketAuthorizer}" 
+
+  ApiPresignedAuthorizerPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Sub "arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PprmrApiGateway}/authorizers/${ApiPresignedAuthorizer}" 
+
+
+  #/{bucket} Resource
   PprmrApiGatewayBucketResource:
     Type: AWS::ApiGateway::Resource
     Properties:
@@ -891,6 +965,7 @@ Resources:
       PathPart: "{bucket}"
       RestApiId: !Ref PprmrApiGateway
 
+  #/s3 - resource
   PprmrApiGatewayPresignedResource:
     Type: AWS::ApiGateway::Resource
     Properties:
@@ -898,6 +973,7 @@ Resources:
       PathPart: "s3"
       RestApiId: !Ref PprmrApiGateway
 
+  #/s3/{Bucket} - resource
   PprmrApiGatewayPresignedBucketResource:
     Type: AWS::ApiGateway::Resource
     Properties:
@@ -905,12 +981,12 @@ Resources:
       PathPart: "{bucket}"
       RestApiId: !Ref PprmrApiGateway
 
-  PprmrApiGatewayPresignedBucketKeyResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      ParentId: !Ref PprmrApiGatewayPresignedBucketResource
-      PathPart: "{key}"
-      RestApiId: !Ref PprmrApiGateway
+  # PprmrApiGatewayPresignedBucketKeyResource:
+  #   Type: AWS::ApiGateway::Resource
+  #   Properties:
+  #     ParentId: !Ref PprmrApiGatewayPresignedBucketResource
+  #     PathPart: "{key}"
+  #     RestApiId: !Ref PprmrApiGateway
 
   # ApiGatewayStage:
   #   Type: AWS::ApiGateway::Stage
@@ -925,13 +1001,38 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub "${APIRestApiName}-loggrp"
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
 
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
       - ApiGatewayGetBucketMethod
-      - ApiGatewayGetPresignedUrlMethod
+      - ApiGatewayGetBucketPresignedUrlMethod
       - ApiGatewayS3BucketMethodOptions
+      - ApiGatewayGetBucketPresignedUrlMethodOptions
       - APIClientCertificate
     Properties:
       Description: API Deployment
@@ -986,7 +1087,9 @@ Resources:
     Type: AWS::ApiGateway::Method
     Properties:
       ApiKeyRequired: false
-      AuthorizationType: NONE
+      # AuthorizationType: NONE
+      AuthorizationType: "Custom"
+      AuthorizerId: !Ref ApiBucketAuthorizer
       HttpMethod: GET
       Integration:
         ConnectionType: INTERNET
@@ -1037,7 +1140,7 @@ Resources:
         IntegrationHttpMethod: OPTIONS
         PassthroughBehavior: WHEN_NO_MATCH
         Type: MOCK
-        RequestTemplates: { "application/json": "" }
+        RequestTemplates: { "application/json": "{\"statusCode\": 200}" }
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
@@ -1060,12 +1163,90 @@ Resources:
       ResourceId: !Ref PprmrApiGatewayBucketResource
       RestApiId: !Ref PprmrApiGateway
 
+  # #Get Presigned URL
+  # ApiGatewayGetPresignedUrlMethod:
+  #   Type: AWS::ApiGateway::Method
+  #   Properties:
+  #     ApiKeyRequired: false
+  #     # AuthorizationType: NONE
+  #     AuthorizationType: "Custom"
+  #     AuthorizerId: !Ref ApiPresignedAuthorizer
+  #     HttpMethod: GET
+  #     Integration:
+  #       ConnectionType: INTERNET
+  #       #Credentials: !GetAtt PprmrApiGatewayRole.Arn
+  #       IntegrationHttpMethod: POST
+  #       PassthroughBehavior: WHEN_NO_MATCH
+  #       Type: AWS_PROXY
+  #       RequestTemplates: { "application/json": "" }
+  #       Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PprmrPresgnUrlFunction.Arn}/invocations"
+  #       IntegrationResponses:
+  #         - ResponseTemplates:
+  #             application/json: ""
+  #           StatusCode: 200
+  #     MethodResponses:
+  #       - StatusCode: 200
+  #         ResponseModels: { "application/json": "Empty" }
+  #         ResponseParameters:
+  #           { "method.response.header.Access-Control-Allow-Origin": false }
+  #       - StatusCode: 400
+  #         ResponseParameters:
+  #           { "method.response.header.Access-Control-Allow-Origin": false }
+  #       - StatusCode: 500
+  #         ResponseParameters:
+  #           { "method.response.header.Access-Control-Allow-Origin": false }
+  #     RequestParameters:
+  #       method.request.path.bucket: false
+  #       method.request.path.key: false
+  #       method.request.querystring.method: false
+  #     ResourceId: !Ref PprmrApiGatewayPresignedBucketKeyResource
+  #     RestApiId: !Ref PprmrApiGateway
+
+  # #Option Method Presigned URL
+  # ApiGatewayGetPresignedUrlMethodOptions:
+  #   Type: AWS::ApiGateway::Method
+  #   Properties:
+  #     ApiKeyRequired: false
+  #     AuthorizationType: NONE
+  #     HttpMethod: OPTIONS
+  #     Integration:
+  #       ConnectionType: INTERNET
+  #       IntegrationHttpMethod: OPTIONS
+  #       PassthroughBehavior: WHEN_NO_MATCH
+  #       Type: MOCK
+  #       RequestTemplates: { "application/json": "" }
+  #       IntegrationResponses:
+  #         - StatusCode: 200
+  #           ResponseParameters:
+  #             {
+  #               "method.response.header.Access-Control-Allow-Origin": "'*'",
+  #               "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+  #               "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'",
+  #             }
+  #     MethodResponses:
+  #       - StatusCode: 200
+  #         ResponseModels: { "application/json": "Empty" }
+  #         ResponseParameters:
+  #           {
+  #             "method.response.header.Access-Control-Allow-Origin": false,
+  #             "method.response.header.Access-Control-Allow-Headers": false,
+  #             "method.response.header.Access-Control-Allow-Methods": false,
+  #           }
+  #     RequestParameters:
+  #       method.request.path.bucket: false
+  #       method.request.path.key: false
+  #     ResourceId: !Ref PprmrApiGatewayPresignedBucketKeyResource
+  #     RestApiId: !Ref PprmrApiGateway
+
+  ####New presigned URL
   #Get Presigned URL
-  ApiGatewayGetPresignedUrlMethod:
+  ApiGatewayGetBucketPresignedUrlMethod:
     Type: AWS::ApiGateway::Method
     Properties:
       ApiKeyRequired: false
-      AuthorizationType: NONE
+      # AuthorizationType: NONE
+      AuthorizationType: "Custom"
+      AuthorizerId: !Ref ApiPresignedAuthorizer
       HttpMethod: GET
       Integration:
         ConnectionType: INTERNET
@@ -1092,13 +1273,13 @@ Resources:
             { "method.response.header.Access-Control-Allow-Origin": false }
       RequestParameters:
         method.request.path.bucket: false
-        method.request.path.key: false
+        method.request.querystring.key: false
         method.request.querystring.method: false
-      ResourceId: !Ref PprmrApiGatewayPresignedBucketKeyResource
+      ResourceId: !Ref PprmrApiGatewayPresignedBucketResource
       RestApiId: !Ref PprmrApiGateway
 
   #Option Method Presigned URL
-  ApiGatewayGetPresignedUrlMethodOptions:
+  ApiGatewayGetBucketPresignedUrlMethodOptions:
     Type: AWS::ApiGateway::Method
     Properties:
       ApiKeyRequired: false
@@ -1109,7 +1290,7 @@ Resources:
         IntegrationHttpMethod: OPTIONS
         PassthroughBehavior: WHEN_NO_MATCH
         Type: MOCK
-        RequestTemplates: { "application/json": "" }
+        RequestTemplates: { "application/json": "{\"statusCode\": 200}" }
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
@@ -1129,8 +1310,7 @@ Resources:
             }
       RequestParameters:
         method.request.path.bucket: false
-        method.request.path.key: false
-      ResourceId: !Ref PprmrApiGatewayPresignedBucketKeyResource
+      ResourceId: !Ref PprmrApiGatewayPresignedBucketResource
       RestApiId: !Ref PprmrApiGateway
 
   #Certificate
@@ -1275,7 +1455,7 @@ Resources:
           ContentTypeOptions: 
             Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
           FrameOptions: 
-            FrameOption: "DENY"
+            FrameOption: "SAMEORIGIN"
             Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
           StrictTransportSecurity: 
             AccessControlMaxAgeSec: 31536000
@@ -1341,6 +1521,7 @@ Resources:
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
 
+  ################## LAMBDA@EDGE ##################
   LambdaEdgeFunctionRole:
     Type: "AWS::IAM::Role"
     Properties:

@@ -10,4 +10,8 @@ export namespace AppConstant {
   export const RESULT_SCREEN = 'Result Screen';
   export const APP_NAME_PPRMR = 'PDF Permission Remover';
   export const USER_NAME = 'User';
+
+  export const AUTH_HEADER = 'Authorization';
+
+  export const ACCESS_TOKEN_KEY = 'access_token';
 }

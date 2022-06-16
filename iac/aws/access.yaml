@@ -1,0 +1,37 @@
+    # access.yml
+  # Authorizer will receive this arn arn:aws:execute-api:<regionId>:<accountId>:<apiId>/<stage>/<method>/<resourcePath>"
+
+---
+apiId: sa6qzkia3b #ID of API gateway
+resources:
+- name: bucket #Authorizer will check if <resourcePath> is matching this name otherwise it will check via Path
+  path: "{bucket}"
+  GET:
+    scopes: #This is used if the caller is an app that uses client ID and secret to authenticate
+      - name: read
+        clients: 
+          - TOPEGDRPPO_OEMPDFPasswordRemoverAWS_OIDC_SI
+    groups: #This is used if the caller is a user 
+      - EPSUsersDev
+
+ 
+- name: s3
+  path: "s3/{bucket}/{key}"
+  GET:
+    scopes:  
+      - name: read
+        clients: 
+          - TOPEGDRPPO_OEMPDFPasswordRemoverAWS_OIDC_SI
+    groups:
+      - EPSUsersDev
+
+
+- name: s3Bucket
+  path: "s3/{bucket}"
+  GET:
+    scopes:  
+      - name: read
+        clients: 
+          - TOPEGDRPPO_OEMPDFPasswordRemoverAWS_OIDC_SI
+    groups:
+      - EPSUsersDev

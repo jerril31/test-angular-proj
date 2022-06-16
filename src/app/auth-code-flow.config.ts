@@ -27,7 +27,7 @@ export const authCodeFlowConfig: AuthConfig = {
   // The first four are defined by OIDC.
   // Important: Request offline_access to get a refresh token
   // The api scope is a usecase specific one
-  scope: useSilentRefreshForCodeFlow ? 'openid profile' : 'openid profile',
+  scope: useSilentRefreshForCodeFlow ? 'openid profile group' : 'openid profile group',
 
   // ^^ Please note that offline_access is not needed for silent refresh
   // At least when using idsvr, this even prevents silent refresh
@@ -36,15 +36,15 @@ export const authCodeFlowConfig: AuthConfig = {
 
   // This is needed for silent refresh (refreshing tokens w/o a refresh_token)
   // **AND** for logging in with a popup
-  //silentRefreshRedirectUri: `${window.location.origin}/silent-refresh.html`,
+  silentRefreshRedirectUri: `${window.location.origin}/silent-refresh.html`,
 
-  //useSilentRefresh: useSilentRefreshForCodeFlow,
+  useSilentRefresh: useSilentRefreshForCodeFlow,
 
   showDebugInformation: true,
 
   sessionChecksEnabled: false,
 
-  timeoutFactor: 0.01,
+  timeoutFactor: 0.5,
   // disablePKCI: true,
 
   clearHashAfterLogin: true,
