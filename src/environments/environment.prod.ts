@@ -4,4 +4,5 @@ export const environment = {
   uploadedFilesBucket: 'techops-eng-prd-pprmr-uploaded-files-s3',
   convertedFilesBucket: 'techops-eng-prd-pprmr-converted-files-s3',
   appDeploymentLevel: 'PRD',
+  validUserGroup: 'TopegdrppoUser'
 };

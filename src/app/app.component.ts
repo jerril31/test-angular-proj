@@ -8,6 +8,9 @@ import {
 } from './model/pdf-pw-remover-file';
 import { environment } from 'src/environments/environment';
 import { LoaderService } from './layout/loader/loader.service';
+import { AuthService } from './service/auth.service';
+import { AppConstant } from './constant/app.constant';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +22,8 @@ export class AppComponent {
 
   access_token: any = '';
 
-  constructor(private oauthService: OAuthService, private headerService: HeaderService, private _loaderSvc: LoaderService) {
+  constructor(private oauthService: OAuthService, private headerService: HeaderService, private _loaderSvc: LoaderService, 
+    private authService: AuthService, private router: Router) {
     this._loaderSvc.show();
     // if(environment.appDeploymentLevel != 'LCL'){
       //Automatically load user profile via OIDC
@@ -34,12 +38,12 @@ export class AppComponent {
             localStorage.setItem('userProfile',JSON.stringify(userProfile));
             localStorage.setItem('username', userProfileObj.info.name);
             headerService.assignUserNameField(userProfileObj.info.name);
-
+            //Validate SSGM Group
+            this.checkUserGroup();
 
           });
           
         });
-      //this.oauthService.setupAutomaticSilentRefresh();
       if (!sessionStorage.getItem('access_token')) {
         console.log('Here 2---');
         //sessionStorage.clear();
@@ -57,6 +61,12 @@ export class AppComponent {
     // }
     this.displayUsername();
    
+  }
+
+  private checkUserGroup(){
+    if (!this.authService.validateUserGroup()) {
+      this.router.navigate([AppConstant.URL_UNAUTHORIZED]);
+    }
   }
 
   private displayUsername(){

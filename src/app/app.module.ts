@@ -24,6 +24,7 @@ import { OAuthModule } from 'angular-oauth2-oidc';
 import {  HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HeaderInterceptor } from 'src/app/service/header.interceptor';
 import { CookieService } from 'ngx-cookie-service';
+import { UnauthorizedComponent } from './module/unauthorized/unauthorized.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { CookieService } from 'ngx-cookie-service';
     LoaderComponent,
     HeaderComponent,
     FooterComponent,
+    UnauthorizedComponent,
   ],
   imports: [
     BrowserModule,

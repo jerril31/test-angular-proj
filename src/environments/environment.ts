@@ -8,6 +8,7 @@ export const environment = {
   uploadedFilesBucket: 'techops-eng-dev-pprmr-uploaded-files-s3',
   convertedFilesBucket: 'techops-eng-dev-pprmr-converted-files-s3',
   appDeploymentLevel: 'LCL',
+  validUserGroup: 'TopegdrppoUserDev'
 };
 
 /*

@@ -12,7 +12,7 @@ resources:
         clients: 
           - TOPEGDRPPO_OEMPDFPasswordRemoverAWS_OIDC_SI
     groups: #This is used if the caller is a user 
-      - EPSUsersDev
+      - TopegdrppoUserDev
 
  
 - name: s3
@@ -23,7 +23,7 @@ resources:
         clients: 
           - TOPEGDRPPO_OEMPDFPasswordRemoverAWS_OIDC_SI
     groups:
-      - EPSUsersDev
+      - TopegdrppoUserDev
 
 
 - name: s3Bucket
@@ -34,4 +34,4 @@ resources:
         clients: 
           - TOPEGDRPPO_OEMPDFPasswordRemoverAWS_OIDC_SI
     groups:
-      - EPSUsersDev
+      - TopegdrppoUserDev

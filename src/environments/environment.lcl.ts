@@ -5,4 +5,5 @@ export const environment = {
   uploadedFilesBucket: 'techops-eng-oem-uploaded-files-psn',
   convertedFilesBucket: 'techops-eng-oem-converted-files-psn',
   appDeploymentLevel: 'LCL',
+  validUserGroup: 'TopegdrppoUserDev'
 };
