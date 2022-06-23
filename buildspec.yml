@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12
+    commands:
+      - echo Installing packages...
+      - export PUPPETEER_DOWNLOAD_HOST=https://npm.taobao.org/mirrors
+      - npm install
+  build:
+    commands:
+      - echo Build started on `date`
+      #- npm run lint
+      #- npm run test:ci
+      - npm run build$ENV
+  post_build:
+    commands:
+      - echo Build completed on `date`
+artifacts:
+  files:
+    - deployspec.yml
+    - dist/**/*
+    - script/exports.sh

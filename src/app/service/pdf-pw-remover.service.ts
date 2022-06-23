@@ -10,12 +10,13 @@ import {
 } from '../model/pdf-pw-remover-file';
 import * as xml2js from 'xml2js';
 import { concatMap } from 'rxjs/operators';
+import { OAuthService } from 'angular-oauth2-oidc';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PdfPwRemoverService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private oauthService: OAuthService) {}
 
   retrieveAllFiles(): Observable<any> {
     return this.retrieveConvertedFiles().pipe(
@@ -27,6 +28,19 @@ export class PdfPwRemoverService {
         return of({ isError: true, data: err });
       })
     );
+  }
+
+  retrieveAccessToken(){
+    //const accessToken = sessionStorage.getItem(AppConstant.ACCESS_TOKEN_KEY);
+    console.log("Getting access token..")
+    const accessToken = this.oauthService.getAccessToken();
+    if(accessToken){
+      return "Bearer " + accessToken;
+    }else{
+      console.log("No access token found.");
+      return "";
+    }
+
   }
 
   extractBucketContents(xmlResponseString: String) {
@@ -77,9 +91,11 @@ export class PdfPwRemoverService {
   }
 
   retrieveConvertedFiles(): Observable<any> {
+    const headers = new HttpHeaders().set(AppConstant.AUTH_HEADER, this.retrieveAccessToken());
+   //const headers = new HttpHeaders();
     return this.http.get(
       `${environment.awsApiGwS3BaseUrl}${environment.convertedFilesBucket}`,
-      { responseType: 'text' }
+      { responseType: 'text', headers: headers }
     );
   }
   /**
@@ -90,19 +106,25 @@ export class PdfPwRemoverService {
    * @returns
    */
   uploadFileViaPresignedUrl(file: File): Observable<any> {
-    const headers = new HttpHeaders();
-    const requestOptions: Object = {
-      headers: headers,
-    };
+    const headersGetPresigned = new HttpHeaders().set(AppConstant.AUTH_HEADER, this.retrieveAccessToken());
+    //const headersGetPresigned = new HttpHeaders();
+    let encodedFilename = encodeURIComponent(file.name);
     console.log('Uploading via presignedURL..');
+    console.log(`${encodedFilename}`);
     return this.http
       .get(
-        `${environment.awsApiGwS3BaseUrl}s3/${environment.uploadedFilesBucket}/${file.name}`,
-        { params: new HttpParams().set('method', 'PUT') }
+        // `${environment.awsApiGwS3BaseUrl}s3/${environment.uploadedFilesBucket}/${encodedFilename}`,
+        // { params: new HttpParams().set('method', 'PUT'), headers: headersGetPresigned}
+        `${environment.awsApiGwS3BaseUrl}s3/${environment.uploadedFilesBucket}`,
+        { params: new HttpParams().set('method', 'PUT').set('key',encodedFilename), headers: headersGetPresigned}
       )
       .pipe(
         concatMap((res: any) => {
-          console.log(res);
+          const headersPutPresigned = new HttpHeaders();
+          const requestOptions: Object = {
+            headers: headersPutPresigned,
+          };
+          //console.log(res);
           return this.http.put(res.presignedUrl, file, requestOptions);
         })
       );
@@ -151,32 +173,82 @@ export class PdfPwRemoverService {
     location: string,
     fileName: string
   ): Observable<any> {
-    const headers = new HttpHeaders().set('accept', 'application/pdf');
-    const requestOptions: Object = {
-      headers: headers,
-    };
+    const headersGetPresigned = new HttpHeaders().set(AppConstant.AUTH_HEADER, this.retrieveAccessToken());
+    //const headersPresigned = new HttpHeaders();
+    // const requestOptions: Object = {
+    //   headers: headers,
+    // };
     let encodedFilename = encodeURIComponent(fileName);
     //Get presigned URL for Download and then make a call on the presigned URL
+    console.log(`${encodedFilename}`);
+
     return this.http
       .get(
-        `${environment.awsApiGwS3BaseUrl}s3/${environment.convertedFilesBucket}/${encodedFilename}`,
-        { params: new HttpParams().set('method', 'GET') }
+        // `${environment.awsApiGwS3BaseUrl}s3/${environment.convertedFilesBucket}/${encodedFilename}`,
+        // { params: new HttpParams().set('method', 'GET') , headers: headersGetPresigned}
+        `${environment.awsApiGwS3BaseUrl}s3/${environment.convertedFilesBucket}`,
+        { params: new HttpParams().set('method', 'GET').set('key', encodedFilename) , headers: headersGetPresigned}
       )
       .pipe(
         concatMap((res: any) => {
-          console.log(res);
+          const headersPresigned = new HttpHeaders().set('accept', 'application/pdf')
+          //console.log(res);
           return this.http
-            .get(res.presignedUrl, {
-              headers: headers,
-              responseType: 'blob',
+          .get(res.presignedUrl, {
+            headers: headersPresigned,
+            responseType: 'blob',
+          })
+          .pipe(
+            map((res) => {
+              console.log(res);
+              return new Blob([res], { type: 'application/pdf' });
             })
-            .pipe(
-              map((res) => {
-                console.log(res);
-                return new Blob([res], { type: 'application/pdf' });
-              })
-            );
-        })
-      );
+          );
+      })
+    );
+
+  //         let fileDirectory = fileName.toString().split("/");
+  //         let encodedFilenameOnly = encodeURIComponent(fileDirectory[1]);
+  //         var url = `https://${environment.convertedFilesBucket}.s3.amazonaws.com/${fileDirectory[0]}/${encodedFilenameOnly}`;
+
+  //         var params = new HttpParams();
+  //         let presignedUrlResponse = res.presignedUrl;
+  //         console.log("Presigned URL Response: " + presignedUrlResponse);
+  //         let paramString = presignedUrlResponse.substring(presignedUrlResponse.indexOf('?')+1);
+  //         console.log("Concat String: ");
+  //         console.log(paramString);
+  //         paramString.split('&').forEach(function (element:any) {
+  //           console.log(element);
+  //           let paramStringItem = element.split('=');
+  //           console.log(paramStringItem);
+  //           let decodedValue = decodeURIComponent(paramStringItem[1]);
+  //           console.log("Decoded: " + decodedValue);
+  //           params = params.append(paramStringItem[0], decodedValue);
+  //         });
+  //         console.log("PARAMS: "+ params);
+  //        // url = url + "?" +  paramString;
+  //         console.log(params);
+  //         return this.retrieveFile(headers,params,url);
+         
+  //       })
+  //     );
+  // }
+
+  // private retrieveFile(
+  //   headers: HttpHeaders, httpParams: HttpParams,
+  //   url: string
+  // ): Observable<any> {
+  //   return this.http
+  //           .get(url, {
+  //             headers: headers, params: httpParams,
+  //             responseType: 'blob'
+  //           })
+  //           .pipe(
+  //             map((res) => {
+  //               console.log(res);
+  //               return new Blob([res], { type: 'application/pdf' });
+  //             })
+  //           );
+
   }
 }

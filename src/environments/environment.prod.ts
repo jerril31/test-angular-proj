@@ -1,8 +1,8 @@
 export const environment = {
   production: true,
-  awsApiGwS3BaseUrl:
-    'https://pa9jumd6vb.execute-api.us-east-1.amazonaws.com/dev/',
-  uploadedFilesBucket: 'techops-eng-oem-uploaded-files-prd',
-  convertedFilesBucket: 'techops-eng-oem-converted-files-prd',
+  awsApiGwS3BaseUrl: 'https://pdfpwdrmr-api.tech-eng-doc-prd.aws.delta.com/',
+  uploadedFilesBucket: 'techops-eng-prd-pprmr-uploaded-files-s3',
+  convertedFilesBucket: 'techops-eng-prd-pprmr-converted-files-s3',
   appDeploymentLevel: 'PRD',
+  validUserGroup: 'TopegdrppoUser'
 };

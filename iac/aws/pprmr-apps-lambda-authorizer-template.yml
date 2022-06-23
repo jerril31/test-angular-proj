@@ -1,0 +1,238 @@
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CF configurations for PDF Permission Remover S3 App Buckets.
+
+Metadata:
+  "AWS::CloudFormation::Interface":
+    ParameterGroups:
+      - Label:
+          default: Required Tags
+        Parameters:
+          - Blockcode
+          - CostCenter
+          - UniqueID
+          - DataClassification
+          - SupportGroup
+          - ChangeGroup
+          - DrTier
+          - PciIndicator
+          - PhiIndicator
+          - SoxIndicator
+          - CuiIndicator
+      - Label:
+          default: Application Configurations
+        Parameters:
+          - AppPrefix
+          - GroupResourcePrefix
+          - Environment
+      - Label:
+          default: S3 Configurations
+        Parameters:
+          - PprmrLambdaCodeBucket
+          - SPABucketName
+          - S3LogsBucketName
+          - S3LogsBucketACL
+          - EmailRecipient
+          - TopicName
+
+
+Parameters:
+  # Prompt for Blockcode
+  Blockcode:
+    Type: String
+    Description: Enter the block code for the Application
+    AllowedPattern: ^[A-Z]{10}$
+    Default: TOPEGDRPPO
+
+  # Prompt for CostCenter
+  CostCenter:
+    Type: String
+    Description: Enter the cost center for the Application
+    AllowedPattern: ^C[0-9]{4}ATG$
+    Default: C8730ATG
+
+  # Prompt for UniqueID
+  UniqueID:
+    Type: String
+    Description: Enter the unique id for the Application
+    AllowedPattern: ^(D|A)[0-9]{7}$
+    Default: D0021487
+
+  # Prompt for DataClassification
+  DataClassification:
+    Type: String
+    Description: Enter the data classification for the Application
+    AllowedValues:
+      - public
+      - internal
+      - confidential
+      - restricted
+    Default: confidential
+
+  # Prompt for cuiIndicator
+  CuiIndicator:
+    Type: String
+    Description: Refers to the category of unclassified information within the U.S. Federal government. Confidential.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for pciIndicator
+  PciIndicator:
+    Type: String
+    Description: Refers to the category used for credit cardholder data and sensitive authentication data.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for phiIndicator
+  PhiIndicator:
+    Type: String
+    Description: Refers to any health information (medical and insurance) related to an individual.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for soxIndicator
+  SoxIndicator:
+    Type: String
+    Description: Refers to any information that has a direct and material impact on Delta's financial reporting.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for DrTier
+  DrTier:
+    Type: String
+    Description: A tier designation, which defines the chronological order of recovery for an application during an IT Disaster event
+    AllowedValues:
+      - mission vital
+      - mission critical
+      - business critical
+      - business essential
+      - business
+    Default: business essential
+
+  # Prompt for SupportGroup
+  SupportGroup:
+    Type: String
+    Description: Enter the support group for the Application
+    AllowedPattern: ^[A-Za-z0-9_ -]+$
+    Default: DN - MEMDS2
+
+  # Prompt for ChangeGroup
+  ChangeGroup:
+    Type: String
+    Description: Enter the change group for the Application
+    AllowedPattern: ^[A-Za-z0-9_ -]+$
+    Default: DN - MEMDS2
+
+  GroupResourcePrefix:
+    Type: String
+    Default: "techops-eng"
+    Description: "Prefix to use in naming resources to be created by this template"
+
+  AppPrefix:
+    Type: String
+    Default: "pprmr"
+    Description: "App Prefix to use in naming resources to be created by this template"
+
+  Environment:
+    Description: Environment to deploy.
+    Type: String
+    Default: dev
+    AllowedValues: ["dev", "si", "prd"]
+    ConstraintDescription: Must specify dev, si or prd.
+
+ 
+  LambdaAuthzCodeBucket:
+    Type: String
+    Default: "techops-eng-dev-pprmr-lambda-authz-s3"
+    Description: "S3 bucket that contains lambda authorizer function project"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  LambdaAuthzArtifact:
+    Type: String
+    Default: "apigw-ambda-authorizer.zip"
+    Description: "S3 bucket file that contains lambda at edge codes"
+  
+  LambdaAuthzFunctionName:
+    Type: String
+    Description: Enter the API GW Lambda Authorizer function name
+    Default: techops-eng-dev-pprmr-lambda-authz-lambda
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
+
+  LambdaAuthzRoleName:
+    Type: String
+    Description: Enter the Lambda role name
+    Default: delegate-admin-techops-eng-dev-pprmr-lambda-authz-role
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]role$
+    MaxLength: 64
+
+  DiscoveryDocument:
+    Type: String
+    Default: https://ssaasi.delta.com/.well-known/openid-configuration
+    Description: OIDC well known configuration
+    
+  S3AccessBucket:
+    Type: String
+    Default: techops-eng-dev-pprmr-lambda-authz-lambda
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
+    Description: S3 bucket containing access.yml 
+
+  S3AccessFileKey:
+    Type: String
+    Default: access.yml
+    Description: S3 key for access.yml file for fine grained access control to weather api 
+  
+  
+Resources:
+  LambdaAuthorizerExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref LambdaAuthzRoleName
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: arn:aws:logs:*:*:*
+          - Effect: Allow
+            Action:
+            - s3:GetObject
+            Resource: !Sub 'arn:aws:s3:::${LambdaAuthzCodeBucket}/*'
+          
+  
+
+  LambdaAuthorizerFunction: 
+    Type: AWS::Lambda::Function
+    Properties: 
+      FunctionName: !Ref LambdaAuthzFunctionName
+      Handler: src/index.handler
+      Role: !GetAtt LambdaAuthorizerExecutionRole.Arn
+      Runtime: nodejs14.x
+      Code:
+        S3Bucket: !Ref LambdaAuthzCodeBucket
+        S3Key: !Ref LambdaAuthzArtifact
+      Timeout: 60
+      MemorySize: 128
+      Environment: 
+        Variables: 
+          DISCOVERY_DOCUMENT: !Ref DiscoveryDocument
+          S3_ACCESS_CONTROL_BUCKET: !Ref LambdaAuthzCodeBucket
+          S3_ACCESS_CONTROL_KEY: !Ref S3AccessFileKey  
+
+  

@@ -33,12 +33,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   setUserName() {
-    this.userName = 'User';
+    this.userName = AppConstant.USER_NAME;
   }
 
   ngOnInit(): void {
     this.subscription = this.headerService.currentTitle.subscribe(
       (title) => (this.title = title)
+    );
+
+    this.subscription = this.headerService.userName.subscribe(
+      (userName) => (this.userName = userName)
     );
     // Set clock time in particular interval
     setInterval(() => {

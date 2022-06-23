@@ -1,0 +1,542 @@
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CF configurations for PDF Permission Remover S3 App Buckets.
+
+Metadata:
+  "AWS::CloudFormation::Interface":
+    ParameterGroups:
+      - Label:
+          default: Required Tags
+        Parameters:
+          - Blockcode
+          - CostCenter
+          - UniqueID
+          - DataClassification
+          - SupportGroup
+          - ChangeGroup
+          - DrTier
+          - PciIndicator
+          - PhiIndicator
+          - SoxIndicator
+          - CuiIndicator
+      - Label:
+          default: Application Configurations
+        Parameters:
+          - AppPrefix
+          - GroupResourcePrefix
+          - Environment
+      - Label:
+          default: S3 Configurations
+        Parameters:
+          - PprmrLambdaCodeBucket
+          - SPABucketName
+          - S3LogsBucketName
+          - S3LogsBucketACL
+          - EmailRecipient
+          - TopicName
+
+
+Parameters:
+  # Prompt for Blockcode
+  Blockcode:
+    Type: String
+    Description: Enter the block code for the Application
+    AllowedPattern: ^[A-Z]{10}$
+    Default: TOPEGDRPPO
+
+  # Prompt for CostCenter
+  CostCenter:
+    Type: String
+    Description: Enter the cost center for the Application
+    AllowedPattern: ^C[0-9]{4}ATG$
+    Default: C8730ATG
+
+  # Prompt for UniqueID
+  UniqueID:
+    Type: String
+    Description: Enter the unique id for the Application
+    AllowedPattern: ^(D|A)[0-9]{7}$
+    Default: D0021487
+
+  # Prompt for DataClassification
+  DataClassification:
+    Type: String
+    Description: Enter the data classification for the Application
+    AllowedValues:
+      - public
+      - internal
+      - confidential
+      - restricted
+    Default: confidential
+
+  # Prompt for cuiIndicator
+  CuiIndicator:
+    Type: String
+    Description: Refers to the category of unclassified information within the U.S. Federal government. Confidential.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for pciIndicator
+  PciIndicator:
+    Type: String
+    Description: Refers to the category used for credit cardholder data and sensitive authentication data.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for phiIndicator
+  PhiIndicator:
+    Type: String
+    Description: Refers to any health information (medical and insurance) related to an individual.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for soxIndicator
+  SoxIndicator:
+    Type: String
+    Description: Refers to any information that has a direct and material impact on Delta's financial reporting.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for DrTier
+  DrTier:
+    Type: String
+    Description: A tier designation, which defines the chronological order of recovery for an application during an IT Disaster event
+    AllowedValues:
+      - mission vital
+      - mission critical
+      - business critical
+      - business essential
+      - business
+    Default: business essential
+
+  # Prompt for SupportGroup
+  SupportGroup:
+    Type: String
+    Description: Enter the support group for the Application
+    AllowedPattern: ^[A-Za-z0-9_ -]+$
+    Default: DN - MEMDS2
+
+  # Prompt for ChangeGroup
+  ChangeGroup:
+    Type: String
+    Description: Enter the change group for the Application
+    AllowedPattern: ^[A-Za-z0-9_ -]+$
+    Default: DN - MEMDS2
+
+  GroupResourcePrefix:
+    Type: String
+    Default: "techops-eng"
+    Description: "Prefix to use in naming resources to be created by this template"
+
+  AppPrefix:
+    Type: String
+    Default: "pprmr"
+    Description: "App Prefix to use in naming resources to be created by this template"
+
+  Environment:
+    Description: Environment to deploy.
+    Type: String
+    Default: dev
+    AllowedValues: ["dev", "si", "prd"]
+    ConstraintDescription: Must specify dev, si or prd.
+
+  ##S3 Buckets
+  # S3LogsBucketName:
+  #   Type: String
+  #   Default: "techops-eng-dev-pprmr-logs-s3"
+  #   Description: "S3 bucket to host S3 logs"
+  #   AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+  #   ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  PprmrLambdaCodeBucket:
+    Type: String
+    Default: "techops-eng-dev-pprmr-lambdacode-s3"
+    Description: "S3 bucket that contains lambda function java project"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+ 
+  #SPA
+  SPABucketName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-spa-s3"
+    Description: "S3 bucket to host PDF Password Remover SPA"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  S3LogsBucketName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-logs-s3"
+    Description: "S3 bucket to host S3 logs"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  LambdAtEdgeCodeBucketName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-lambda-edge-s3"
+    Description: "S3 bucket that contains lambda function java project"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+
+  EmailRecipient:
+    Type: String
+    Default: "jerril.villalon@delta.com"
+    Description: "S3 Bucket event notification email recipient"
+
+  TopicName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-s3-topic"
+    Description: "S3 Bucket Event Notif Topic"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]topic$
+
+  S3LogsBucketACL:
+    Type: String
+    Description: S3 Log Bucket Canned Access Control List 
+    Default: "LogDeliveryWrite"
+    AllowedValues:
+      - LogDeliveryWrite
+      - Private
+  
+Resources:
+  #####S3 Buckets#####
+  #S3 Bucket for Logs
+  S3LogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3LogsBucketName
+      AccessControl: !Ref S3LogsBucketACL
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls : true
+        BlockPublicPolicy : true
+        IgnorePublicAcls : true
+        RestrictPublicBuckets : true
+      LifecycleConfiguration:
+        Rules:
+          - Id: delete-s3-old-logs
+            Prefix: pprmr-s3-logs/
+            Status: Enabled
+            ExpirationInDays: 5
+            NoncurrentVersionExpirationInDays: 1
+          - Id: delete-cfrnt-old-logs
+            Prefix: pprmr-cloudfront-logs/
+            Status: Enabled
+            ExpirationInDays: 5
+            NoncurrentVersionExpirationInDays: 1
+      #TODO: Ucomment
+      # BucketEncryption:
+      #   ServerSideEncryptionConfiguration:
+      #     - ServerSideEncryptionByDefault:
+      #         KMSMasterKeyID: 'techops-eng-dev-pprmr-kms-key'
+      #         SSEAlgorithm: 'aws:kms'
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Topic: !Ref Topic
+            Event: s3:ObjectTagging:*
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  # PprmrKey:
+  #   Type: 'AWS::KMS::Key'
+  #   Properties:
+  #     Description: An example symmetric encryption KMS key
+  #     EnableKeyRotation: true
+  #     PendingWindowInDays: 20
+  #     KeyPolicy:
+  #       Version: 2012-10-17
+  #       Id: techops-eng-dev-pprmr-kms-key
+  #       Statement:
+          
+  #         - Sid: Allow administration of the key
+  #           Effect: Allow
+  #           Principal:
+  #             AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+  #           Action: 'kms:*'
+  #           Resource: '*'
+         
+
+  Topic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Ref TopicName
+      TopicName: !Ref TopicName
+      KmsMasterKeyId: alias/aws/sns
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref EmailRecipient
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  SNSTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: sns:Publish
+            Resource: !Ref Topic
+            # Condition:
+            #   # ArnLike:
+            #   #    !Join [
+            #   #       "",
+            #   #       [
+            #   #         "arn:aws:s3:::",
+            #   #         !Join ["-", [!Ref AWS::StackName, !Ref PprmrLambdaCodeBucket]],
+            #   #       ],
+            #   #     ]
+            #    ArnLike:
+            #      !Join [
+            #         "",
+            #         [
+            #           "arn:aws:s3:::",
+            #           !Ref PprmrLambdaCodeBucket
+            #         ],
+            #       ]
+      Topics:
+        - !Ref Topic
+    
+
+  S3LogsBucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref S3LogsBucketName
+      PolicyDocument:
+        Statement:
+          - Effect: Deny
+            Principal: "*"
+            Resource: !Sub "arn:aws:s3:::${S3LogsBucketName}"
+            Action: "*"
+            Condition:
+              Bool:
+                "aws:SecureTransport": false
+          # - Sid: "AllowCloudFrontToUsekeyToDeliverLogs"
+          #   Effect: Allow
+          #   Principal:
+          #     Service: 
+          #       - "delivery.logs.amazonaws.com"
+          #   Action: 
+          #     - "kms:GenerateDataKey*"
+          #   Resource: "*"
+  
+  LambdaCodeS3BucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref PprmrLambdaCodeBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Deny
+            Principal: "*"
+            Resource: !Sub "arn:aws:s3:::${PprmrLambdaCodeBucket}"
+            Action: "*"
+            Condition:
+              Bool:
+                "aws:SecureTransport": false
+  
+  #S3 Bucket for SPA
+  SPACodeS3BucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref SPABucketName
+      PolicyDocument:
+        Statement:
+          - Effect: Deny
+            Principal: "*"
+            Resource: !Sub "arn:aws:s3:::${SPABucketName}"
+            Action: "s3:*"
+            Condition:
+              Bool:
+                "aws:SecureTransport": false
+
+  #S3 Bucket for Lambda Function
+  LambdaCodeS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref PprmrLambdaCodeBucket
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3LogsBucket
+        LogFilePrefix: pprmr-s3-logs/lambdacode-bucket-logs/
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls : true
+        BlockPublicPolicy : true
+        IgnorePublicAcls : true
+        RestrictPublicBuckets : true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Topic: !Ref Topic
+            Event: s3:ObjectRemoved:*
+
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  
+  SPACodeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref SPABucketName
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3LogsBucket
+        LogFilePrefix: pprmr-s3-logs/spa-bucket-logs/
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls : true
+        BlockPublicPolicy : true
+        IgnorePublicAcls : true
+        RestrictPublicBuckets : true
+      # BucketEncryption:
+      #   ServerSideEncryptionConfiguration:
+      #     - ServerSideEncryptionByDefault:
+      #         SSEAlgorithm: 'aws:kms'
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Topic: !Ref Topic
+            Event: s3:ObjectRemoved:*
+
+
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  #S3 Bucket for Lambda At Edge Function
+  LambdaAtEdgeCodeS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref LambdAtEdgeCodeBucketName
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3LogsBucket
+        LogFilePrefix: pprmr-s3-logs/lambdaatedge-code-bucket-logs/
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls : true
+        BlockPublicPolicy : true
+        IgnorePublicAcls : true
+        RestrictPublicBuckets : true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Topic: !Ref Topic
+            Event: s3:ObjectRemoved:*
+
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+Outputs:
+  LambdaS3Bucket:
+    Description: S3 Bucket for Lambda Function
+    Value: !Sub "${PprmrLambdaCodeBucket}"
+
+  SPAS3Bucket:
+    Description: S3 Bucket for SPA
+    Value: !Sub "${SPABucketName}"
+
+  

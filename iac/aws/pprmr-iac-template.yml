@@ -1,0 +1,1895 @@
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CF configurations for PDF Permission Remover AWS Components.
+
+Metadata:
+  "AWS::CloudFormation::Interface":
+    ParameterGroups:
+      - Label:
+          default: Required Tags
+        Parameters:
+          - Blockcode
+          - CostCenter
+          - UniqueID
+          - DataClassification
+          - SupportGroup
+          - ChangeGroup
+          - DrTier
+          - PciIndicator
+          - PhiIndicator
+          - SoxIndicator
+          - CuiIndicator
+      - Label:
+          default: Application Configurations
+        Parameters:
+          - AppPrefix
+          - GroupResourcePrefix
+          - Environment
+      - Label:
+          default: Policies and Roles
+        Parameters:
+          - LambdaPolicyName
+          - LambdaRoleName
+          - ApiPolicyName
+          - ApiRoleName
+
+      - Label:
+          default: S3 Configurations
+        Parameters:
+          - UploadFilesBucketName
+          - ConvertedFilesBucketName
+          - S3LogsBucketName
+
+      - Label:
+          default: API Gateway Configurationss
+        Parameters:
+          - APIRestApiName
+          - APICustomUri
+          - APIEndpointType
+          - APICustomDomainEndpointType
+          - APICustomRoute53
+          - APIHostedZoneId
+          - CertificateAuthorityArnValue
+          - APIWebACLName
+          - LambdaAuthzFunctionName
+          - ApiBucketAuthorizerName
+          - ApiPresignedAuthorizerName
+      - Label:
+          default: Lambda Function Configurations
+        Parameters:
+          - PprmrLambdaCodeBucket
+          - PprmrLambdaCodeKey
+          - PprmrLambdaFunctionName
+          - PprmrLambdaFunctionTimeout
+          - PprmrLambdaFunctionMemory
+          - PprmrPresignedLambdaFunctionName
+          - PresignedUrlLambdaFunctionTimeout
+          - PresignedUrlLambdaFunctionMemory
+
+      - Label:
+          default: SPA Configurations
+        Parameters:
+          - SPABucketName
+          - SPACustomUri
+          - SPAHostedZoneId
+          - SPAWebACLName
+          - SPACloudfrontHeaderPolicyConfig
+          - SPACloudfrontContentSecurityPolicy
+          - SPACloudfrontOriginHeaderPolicyOverride
+
+      - Label:
+          default: Lambda@Edge Configurations
+        Parameters:
+          - LambdaAtEdgeCodeBucket
+          - LambdaAtEdgeCodeArtifact
+          - LambdaAtEdgeFunctionName
+          - LambdaAtEdgeRoleName
+          - SecretName
+          - PublicKey
+          - PrivateKey
+      - Label:
+          default: Notification Configurations
+        Parameters:
+          - TopicName
+
+Parameters:
+  # Prompt for Blockcode
+  Blockcode:
+    Type: String
+    Description: Enter the block code for the Application
+    AllowedPattern: ^[A-Z]{10}$
+    Default: TOPEGDRPPO
+
+  # Prompt for CostCenter
+  CostCenter:
+    Type: String
+    Description: Enter the cost center for the Application
+    AllowedPattern: ^C[0-9]{4}ATG$
+    Default: C8730ATG
+
+  # Prompt for UniqueID
+  UniqueID:
+    Type: String
+    Description: Enter the unique id for the Application
+    AllowedPattern: ^(D|A)[0-9]{7}$
+    Default: D0021487
+
+  # Prompt for DataClassification
+  DataClassification:
+    Type: String
+    Description: Enter the data classification for the Application
+    AllowedValues:
+      - public
+      - internal
+      - confidential
+      - restricted
+    Default: confidential
+
+  # Prompt for cuiIndicator
+  CuiIndicator:
+    Type: String
+    Description: Refers to the category of unclassified information within the U.S. Federal government. Confidential.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for pciIndicator
+  PciIndicator:
+    Type: String
+    Description: Refers to the category used for credit cardholder data and sensitive authentication data.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for phiIndicator
+  PhiIndicator:
+    Type: String
+    Description: Refers to any health information (medical and insurance) related to an individual.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for soxIndicator
+  SoxIndicator:
+    Type: String
+    Description: Refers to any information that has a direct and material impact on Delta's financial reporting.
+    AllowedValues: [true, false]
+    Default: false
+
+  # Prompt for DrTier
+  DrTier:
+    Type: String
+    Description: A tier designation, which defines the chronological order of recovery for an application during an IT Disaster event
+    AllowedValues:
+      - mission vital
+      - mission critical
+      - business critical
+      - business essential
+      - business
+    Default: business essential
+
+  # Prompt for SupportGroup
+  SupportGroup:
+    Type: String
+    Description: Enter the support group for the Application
+    AllowedPattern: ^[A-Za-z0-9_ -]+$
+    Default: DN - MEMDS2
+
+  # Prompt for ChangeGroup
+  ChangeGroup:
+    Type: String
+    Description: Enter the change group for the Application
+    AllowedPattern: ^[A-Za-z0-9_ -]+$
+    Default: DN - MEMDS2
+
+  GroupResourcePrefix:
+    Type: String
+    Default: "techops-eng"
+    Description: "Prefix to use in naming resources to be created by this template"
+
+  AppPrefix:
+    Type: String
+    Default: "pprmr"
+    Description: "App Prefix to use in naming resources to be created by this template"
+
+  Environment:
+    Description: Environment to deploy.
+    Type: String
+    Default: dev
+    AllowedValues: ["dev", "si", "prd"]
+    ConstraintDescription: Must specify dev, si or prd.
+
+  ##S3 Buckets
+  UploadFilesBucketName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-uploaded-files-s3"
+    Description: "S3 bucket to host uploaded PDF files"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  ConvertedFilesBucketName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-converted-files-s3"
+    Description: "S3 bucket to host processed PDF files"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  S3LogsBucketName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-logs-s3"
+    Description: "S3 bucket to host S3 logs"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  PprmrLambdaCodeBucket:
+    Type: String
+    Default: "techops-eng-dev-pprmr-lambdacode-s3"
+    Description: "S3 bucket that contains lambda function java project"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  PprmrLambdaCodeKey:
+    Type: String
+    Default: "pdf-password-remover-lambda.jar"
+    Description: "S3 bucket file that contains lambda function java project"
+
+  APIRestApiName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-api"
+    Description: "PDF Pwd Remover API Gateway Name"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]api$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  APICustomUri:
+    Type: String
+    Description: "The name of the stage to deploy the API to."
+    Default: "pdfpwdrmr-api.tech-eng-doc-dev.aws.delta.com"
+
+  # Route53HostedZone:
+  #   Type: String
+  #   Description: The name of the Route53HostedZone created in the AWS account
+  #   Default: tech-engnring-dev.aws.delta.com.
+
+  APIHostedZoneId:
+    Type: String
+    #Default: "Z04698412PRZRE50Q7WCF"
+    Default: "Z0215960IIPS18QMPP1Q"
+    Description: "Hosted zone where API CNAME record will be created"
+
+  APIEndpointType:
+    Type: String
+    Description: "The name of the EndpointType for the API Gateway values are Regional, Edge, Private"
+    Default: "REGIONAL"
+    AllowedValues:
+      - REGIONAL
+      - PRIVATE
+      - EDGE
+
+  APICustomDomainEndpointType:
+    Type: String
+    Description: "The name of the EndpointType for the custom domain values are Regional, Edge"
+    Default: "REGIONAL"
+    AllowedValues:
+      - REGIONAL
+      - EDGE
+  
+
+  CertificateAuthorityArnValue:
+    # Type : 'AWS::SSM::Parameter::Value<String>'
+    Type: String
+    Description: "Certificate Authority Arn"
+    # Default: /delta/acm/pca/arn
+    Default: "arn:aws:acm-pca:us-east-1:945041172800:certificate-authority/4d67b2ea-f6d6-410f-ac45-7466e2fb8351"
+
+  LambdaRoleName:
+    Type: String
+    Description: Enter the Lambda role name
+    Default: delegate-admin-techops-eng-dev-pprmr-lambda-access-role
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]role$
+    MaxLength: 64
+
+  ApiRoleName:
+    Type: String
+    Description: Enter the API Gateway role name
+    Default: delegate-admin-techops-eng-dev-pprmr-api-gateway-access-role
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]role$
+    MaxLength: 64
+
+  LambdaPolicyName:
+    Type: String
+    Description: Enter the Lambda Policy name
+    Default: delegate-admin-techops-eng-dev-pprmr-lambda-policy
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]policy$
+    MaxLength: 64
+
+  ApiPolicyName:
+    Type: String
+    Description: Enter the API Gateway Policy name
+    Default: delegate-admin-techops-eng-dev-pprmr-api-policy
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]policy$
+    MaxLength: 64
+
+  PprmrLambdaFunctionName:
+    Type: String
+    Description: Enter the Lambda function name
+    Default: techops-eng-dev-pprmr-lambda
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
+    MaxLength: 64
+
+  PprmrLambdaFunctionTimeout:
+    Type: Number
+    Description: PDF Password Remover Timeout
+    Default: 300
+
+  PprmrLambdaFunctionMemory:
+    Type: Number
+    Description: PDF Password Remover Memory Size
+    Default: 4096
+
+  PprmrPresignedLambdaFunctionName:
+    Type: String
+    Description: Enter the Presigned Lambda function name
+    Default: techops-eng-dev-pprmr-prsgn-url-lambda
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
+    MaxLength: 64
+
+  PresignedUrlLambdaFunctionTimeout:
+    Type: Number
+    Description: PDF Password Remover Timeout
+    Default: 300
+
+  PresignedUrlLambdaFunctionMemory:
+    Type: Number
+    Description: PDF Password Remover Memory Size
+    Default: 512
+
+  #SPA
+  SPABucketName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-spa-s3"
+    Description: "S3 bucket to host PDF Password Remover SPA"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  SPAHostedZoneId:
+    Type: String
+    #Default: "Z04698412PRZRE50Q7WCF"
+    Default: "Z05930841BO2EVUF6BZ5N"
+    Description: "Hosted zone where CNAME record will be created"
+
+  SPACustomUri:
+    Type: String
+    Description: "SPA URL."
+    Default: "pdfpwdrmr.tech-eng-doc-dev.pub.delta.com"
+    #Default: "tech-eng-doc-dev.aws.delta.com"
+
+  SPACloudfrontHeaderPolicyConfig:
+    Type: String
+    Default: "techops-eng-dev-pprmr-spa-res-header-policy"
+    Description: "Name for Cloudfront Response Header Policy"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]policy$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  SPACloudfrontContentSecurityPolicy:
+    Type: String
+    Description: "Content Security Policy to be set on the response header of the SPA for Security. (ex.script-src 'self'; font-src 'self';  style-src 'self' )."
+    Default: "default-src 'none'; script-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' https://*.delta.com https://*.amazonaws.com; frame-src 'self' https://*.delta.com;  style-src 'self' 'unsafe-inline'; object-src 'none'"
+
+  SPACloudfrontOriginHeaderPolicyOverride:
+    Type: String
+    AllowedValues: [true, false]
+    Description: "Allow Cloudfront to override Header Policy from origin."
+    Default: true
+    
+
+   
+  TopicName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-s3-topic"
+    Description: "S3 Bucket Event Notif Topic"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]topic$
+
+  SPAWebACLName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-spa-waf"
+    Description: "SPA Web ACL"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]waf$
+
+  APIWebACLName:
+    Type: String
+    Default: "techops-eng-dev-pprmr-api-waf"
+    Description: "API Web ACL"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]waf$
+
+  LambdaAtEdgeCodeBucket:
+    Type: String
+    Default: "techops-eng-dev-pprmr-lambda-edge-s3"
+    Description: "S3 bucket that contains lambda function java project"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+
+  LambdaAtEdgeCodeArtifact:
+    Type: String
+    Default: "lambda-at-edge-code.zip"
+    Description: "S3 bucket file that contains lambda at edge codes"
+  
+  LambdaAtEdgeFunctionName:
+    Type: String
+    Description: Enter the Lambda At Edge function name
+    Default: techops-eng-dev-pprmr-lambda-at-edge-lambda
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
+
+  LambdaAtEdgeRoleName:
+    Type: String
+    Description: Enter the Lambda role name
+    Default: delegate-admin-techops-eng-dev-pprmr-lambda-at-edge-role
+    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]role$
+    MaxLength: 64
+
+  SecretName:
+    Type: String
+    Description: 'Name of the secrets used in viewer request'  
+    Default: "techops-eng-dev-pprmr-lambda-edge-secret"
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]secret$
+
+  PublicKey:
+    Type: String
+    Default: "-----BEGIN PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwwEGGNmy9gRxAPd964wI\\nUPDNnd6agaoiCMnnrQO+oVrVfP3LcZC9WmrSL2y1dVCJd/HQatB4+8jsGCKvJp6q\\nO4kQ/wd8mhAeKDT6kwVoERjXJsiVIv/xCXP0D/U5TAhbuasUq1f14rmiGIZhfCVD\\ntbpc7R+qbAm7kAWnqIdR92XhN3VirknhmaHgpJCW8MNEOj4z3CdIecd8elY2D71B\\n59z9CCyEeLDJENVuqknPukVrDF6ISDieK1dro2UaaFC7hY0rpuAWGkJkcSBGPeLp\\nNQFPRMrOyt/+fp27XR6HuBBPS5ah/1FXbtNpK7jI1AS9LxdE7O1ZnY00AJPvyiZ7\\n1QIDAQAB\\n-----END PUBLIC KEY-----\\n"
+    Description: 'Public key value used to sign synthetic TOKEN'  
+
+  PrivateKey:
+    Type: String
+    Default: "-----BEGIN PRIVATE KEY-----\\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDDAQYY2bL2BHEA\\n933rjAhQ8M2d3pqBqiIIyeetA76hWtV8/ctxkL1aatIvbLV1UIl38dBq0Hj7yOwY\\nIq8mnqo7iRD/B3yaEB4oNPqTBWgRGNcmyJUi//EJc/QP9TlMCFu5qxSrV/XiuaIY\\nhmF8JUO1ulztH6psCbuQBaeoh1H3ZeE3dWKuSeGZoeCkkJbww0Q6PjPcJ0h5x3x6\\nVjYPvUHn3P0ILIR4sMkQ1W6qSc+6RWsMXohIOJ4rV2ujZRpoULuFjSum4BYaQmRx\\nIEY94uk1AU9Eys7K3/5+nbtdHoe4EE9LlqH/UVdu02kruMjUBL0vF0Ts7VmdjTQA\\nk+/KJnvVAgMBAAECggEAWfFa8pNW7ApYZO3CcqaAH3UyIaLO+QeT8yHNbgvQHXRc\\nC+6zq4nrDI1ArQcjGx0uithKHTpS0y91VhyJVPLR6evqnvbBDf5pKnplKPLRcTFX\\n61eREjei4Y1OAR5Gcz9Xr2etfOpxS0X78fvpcu1tMaDnw6dbX8GNdXxmPGFN+SGA\\nwVYUCTSparT2zJqYlv7ZDrnH4RPg/r+oGfTuxPaKFmpqXTK90ko0V9B29g0nDwqk\\niAudmiFO4F64KnRKGCDv3QapVzEngy39MLPP7ITxjDC6DAtVgCheFT8gE7BJeWMj\\nnMD9+dgM7EnnYuUZKxtvP9QyGdoHB4eZf8ibB1QigQKBgQD+uL57Zvh+bhl1Lakk\\nH8cWcbpR0lWT75lw57NVPnVdNpVbjvqh98FQITXgbUBTtTGcftr2Myrj+OtclCvS\\nCLUdEhY3UtYFYy8IkSTodrMfAEQD08ATgY3eisxUDVaSCH50sEVD+P7ZYJKEiwM1\\nKY5v5M1UVg7ghUsgni1HpfmmPQKBgQDD+46UW0PQmC/A/N8SMFm1rhFk8cTzSh10\\nrQz4pmqxIBVi38L7xC3IHug60JDGejSriUc5R15X6KkqlzKawY0ewZhNVqBq2yQF\\nzrJbxs6DxLn9YpCylalEulqw98S7TbJ3yqvTniMCRTXI18DkDTSHZMAmd/B0IrzD\\n818207odeQKBgQDRYiuyZMJ/qyFiIVaYS0bsPDBccfnG0X3gQZY4zE7NgMDlsnJ0\\nEaTmqWYQRb5LEPbnHaAAIa9wFn3ibCpZTK8UZnm8oGstoopXEHi2Xlx/b0h5nOaX\\nIjfsZ0vvC8fN4w2P/hXx+gwDxE6shVjtqmtbr0jZuqQgC3HmLiAqdVTyQQKBgA2i\\nHz4Ex0foflHvhVkPkf4IeN9LzkaaXkgyjZdyhDOEJti09ixrbj/gnokQ3zFfaPCR\\n4SmD5HU7EyGKWRPY6Qc9smmW4Bvu2KeqxE+MGeuisMmGpMg3jwnf6NUstzvMYODi\\ncWeMNaU/yUkKcTmsDX5prNBAQbLig70h3frDacwJAoGAdlP8J6qIfRYfkTo/hoH0\\n6e0klEHkdw6kiYMLwA1UHKxjs3PUuYrQ4mCdBMsKK+MEA8FRgQRqX+k0KlJTuCpR\\njQlV3xfwqtBE6Cc3rT3KVEm2q6haFSfo0bpFQkgRxRHNW8J4I1I/Kl2CI627D/wo\\nM4vQXImU5Ti5yDsumI9eg54=\\n-----END PRIVATE KEY-----\\n"
+    Description: 'Private key value used to sign synthetic TOKEN'    
+
+  LambdaAuthzFunctionName:
+    Type: String
+    Description: Enter the API GW Lambda Authorizer function name
+    Default: techops-eng-dev-pprmr-lambda-authz-lambda
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
+
+
+  ApiPresignedAuthorizerName:
+    Type: String
+    Description: Enter Authorizer Name for the API Gateway Presigned Method Authorizer
+    Default: techops-eng-dev-pprmr-ping-signature-presigned-authorizer
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]authorizer$
+
+  ApiBucketAuthorizerName:
+    Type: String
+    Description: Enter Authorizer Name for the API Gateway Bucket Method Authorizer
+    Default: techops-eng-dev-pprmr-ping-signature-bucket-authorizer
+    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]authorizer$
+
+Resources:
+  #####S3 Buckets#####
+  #S3 Bucket for Upload Files
+  UploadBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: "S3InvokeLambdaPermission"
+    Properties:
+      BucketName: !Ref UploadFilesBucketName
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Function: !GetAtt PprmrLambdaFunction.Arn
+            Event: "s3:ObjectCreated:Put"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: .pdf
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3LogsBucketName
+        LogFilePrefix: pprmr-s3-logs/uploaded-files-logs/
+      LifecycleConfiguration:
+        Rules:
+          - Id: delete-expired-uploaded-files
+            Status: Enabled
+            ExpirationInDays: 1
+            NoncurrentVersionExpirationInDays: 1
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins:
+              - "*"
+            AllowedMethods:
+              - POST
+              - GET
+              - PUT
+              - HEAD
+            AllowedHeaders:
+              - "*"
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  #S3 Bucket for Processed Files
+  ConvertedBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref ConvertedFilesBucketName
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3LogsBucketName
+        LogFilePrefix: pprmr-s3-logs/converted-files-logs/
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Topic: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${TopicName}
+            Event: s3:ObjectTagging:*
+      LifecycleConfiguration:
+        Rules:
+          - Id: delete-expired-error-files
+            Prefix: error-files/
+            Status: Enabled
+            ExpirationInDays: 1
+            NoncurrentVersionExpirationInDays: 1
+          - Id: delete-expired-success-files
+            Prefix: success-files/
+            Status: Enabled
+            ExpirationInDays: 1
+            NoncurrentVersionExpirationInDays: 1
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins:
+              - "*"
+            AllowedMethods:
+              - POST
+              - GET
+              - PUT
+              - HEAD
+            AllowedHeaders:
+              - "*"
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  # #S3 Bucket for Logs
+  # S3LogsBucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Ref S3LogsBucketName
+  #     AccessControl: "LogDeliveryWrite"
+  #     LifecycleConfiguration:
+  #       Rules:
+  #         - Id: delete-old-logs
+  #           Prefix: pprmr-s3-logs/
+  #           Status: Enabled
+  #           ExpirationInDays: 1
+  #           NoncurrentVersionExpirationInDays: 1
+  #     Tags:
+  #       - Key: costCenter
+  #         Value: !Ref CostCenter
+  #       - Key: uniqueID
+  #         Value: !Ref UniqueID
+  #       - Key: dataClassification
+  #         Value: !Ref DataClassification
+  #       - Key: supportGroup
+  #         Value: !Ref SupportGroup
+  #       - Key: changeGroup
+  #         Value: !Ref ChangeGroup
+  #       - Key: blockcode
+  #         Value: !Ref Blockcode
+  #       - Key: drTier
+  #         Value: !Ref DrTier
+  #       - Key: pciIndicator
+  #         Value: !Ref PciIndicator
+  #       - Key: phiIndicator
+  #         Value: !Ref PhiIndicator
+  #       - Key: soxIndicator
+  #         Value: !Ref SoxIndicator
+  #       - Key: cuiIndicator
+  #         Value: !Ref CuiIndicator
+
+  ##### Policies #####
+  ApiGatewayAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Ref ApiPolicyName
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:ListBucketVersions
+              - s3:ListBucket
+              - s3:PutObjectTagging
+              - s3:DeleteObject
+            Effect: Allow
+            Resource:
+              - Fn::Sub: arn:aws:s3:::${UploadFilesBucketName}
+              - Fn::Sub: arn:aws:s3:::${UploadFilesBucketName}/*
+              - Fn::Sub: arn:aws:s3:::${ConvertedFilesBucketName}
+              - Fn::Sub: arn:aws:s3:::${ConvertedFilesBucketName}/*
+          - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              - "*"
+          - Action:
+              - s3:ListAllMyBuckets
+            Effect: Allow
+            Resource:
+              - Fn::Sub: arn:aws:s3:::${UploadFilesBucketName}
+              - Fn::Sub: arn:aws:s3:::${UploadFilesBucketName}}/*
+              - Fn::Sub: arn:aws:s3:::${ConvertedFilesBucketName}
+              - Fn::Sub: arn:aws:s3:::${ConvertedFilesBucketName}/*
+
+  ##################PDF PW Remover LAMBDA###################
+  LambdaAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Ref LambdaPolicyName
+      Description: Techops Eng Pdf Pw Remover Policy for S3 and Cloudwatch
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:ListBucketVersions
+              - s3:ListBucket
+              - s3:PutObjectTagging
+              - s3:DeleteObject
+            Effect: Allow
+            Resource:
+              - Fn::Sub: arn:aws:s3:::${UploadFilesBucketName}
+              - Fn::Sub: arn:aws:s3:::${UploadFilesBucketName}/*
+              - Fn::Sub: arn:aws:s3:::${ConvertedFilesBucketName}
+              - Fn::Sub: arn:aws:s3:::${ConvertedFilesBucketName}/*
+          - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              - s3:ListAllMyBuckets
+            Effect: Allow
+            Resource:
+              - "*"
+
+  S3InvokeLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt PprmrLambdaFunction.Arn
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref "AWS::AccountId"
+      SourceArn: !Sub "arn:aws:s3:::${UploadFilesBucketName}"
+
+  ApiGatewayInvokeLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt PprmrPresgnUrlFunction.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PprmrApiGateway}/*/GET/s3/*/*
+
+  ApiGatewayPresignedInvokeLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt PprmrPresgnUrlFunction.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PprmrApiGateway}/*/GET/s3/*
+
+
+   ################## ROLES ##################
+  PprmrLambdaFunctionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Ref LambdaRoleName
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+      Path: "/"
+      ManagedPolicyArns:
+        - !Ref LambdaAccessPolicy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - #Sid: "AllowLambdaServiceToAssumeRole"
+            Effect: "Allow"
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  PprmrApiGatewayRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Ref ApiRoleName
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+      Path: "/"
+      ManagedPolicyArns:
+        - !Ref ApiGatewayAccessPolicy
+        - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - #Sid: "AllowApiGatewayToAssumeRole"
+            Effect: "Allow"
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "apigateway.amazonaws.com"
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  #### Lambda Functions ####
+  PprmrLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref PprmrLambdaFunctionName
+      Description: Lambda function that will remove permission from uploaded PDF files from S3 bucket
+      Handler: com.delta.techops.eng.pprmr.PdfPwRemoverUploadHandler::handleRequest
+      Runtime: java8
+      Role: !GetAtt PprmrLambdaFunctionRole.Arn
+      Timeout: !Ref PprmrLambdaFunctionTimeout
+      MemorySize: !Ref PprmrLambdaFunctionMemory
+      Code:
+        S3Bucket: !Ref PprmrLambdaCodeBucket
+        S3Key: !Ref PprmrLambdaCodeKey
+      Environment:
+        Variables:
+          ENVIRONMENT: !Sub "${Environment}"
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+
+   ##################PDF PW Remover PRESIGNED LAMBDA##################
+  PprmrPresgnUrlFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref PprmrPresignedLambdaFunctionName
+      Description: Lambda function that will return presigned URL for S3 connection
+      Handler: com.delta.techops.eng.pprmr.PdfPwRemoverPresignedUrlHandler::handleRequest
+      Runtime: java8
+      Role: !GetAtt PprmrLambdaFunctionRole.Arn
+      Timeout: !Ref PresignedUrlLambdaFunctionTimeout
+      MemorySize: !Ref PresignedUrlLambdaFunctionMemory
+      Code:
+        S3Bucket: !Ref PprmrLambdaCodeBucket
+        S3Key: !Ref PprmrLambdaCodeKey
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+   ##################  API GATEWAY ##################
+  PprmrApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Description: Techops PDF PW Remover API Gateway
+      Name: !Ref APIRestApiName
+      EndpointConfiguration:
+        Types:
+          - !Ref APIEndpointType
+      Parameters:
+        endpointConfigurationTypes: REGIONAL
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  #API GW Presigned Authorizer
+  ApiPresignedAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties: 
+      AuthorizerUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}/invocations"
+      RestApiId: !Ref PprmrApiGateway
+      Type: "TOKEN"
+      IdentitySource: method.request.header.Authorization
+      Name: !Sub "${ApiPresignedAuthorizerName}"
+
+
+   #API GW Get Bucket Authorizer
+  ApiBucketAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties: 
+      AuthorizerUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}/invocations"
+      RestApiId: !Ref PprmrApiGateway
+      Type: "TOKEN"
+      IdentitySource: method.request.header.Authorization
+      Name: !Sub "${ApiBucketAuthorizerName}"
+
+  #AUthorizer Permissions
+  ApiBucketAuthorizerPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Sub "arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PprmrApiGateway}/authorizers/${ApiBucketAuthorizer}" 
+
+  ApiPresignedAuthorizerPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Sub "arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PprmrApiGateway}/authorizers/${ApiPresignedAuthorizer}" 
+
+
+  #/{bucket} Resource
+  PprmrApiGatewayBucketResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt PprmrApiGateway.RootResourceId
+      PathPart: "{bucket}"
+      RestApiId: !Ref PprmrApiGateway
+
+  #/s3 - resource
+  PprmrApiGatewayPresignedResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt PprmrApiGateway.RootResourceId
+      PathPart: "s3"
+      RestApiId: !Ref PprmrApiGateway
+
+  #/s3/{Bucket} - resource
+  PprmrApiGatewayPresignedBucketResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref PprmrApiGatewayPresignedResource
+      PathPart: "{bucket}"
+      RestApiId: !Ref PprmrApiGateway
+
+  # PprmrApiGatewayPresignedBucketKeyResource:
+  #   Type: AWS::ApiGateway::Resource
+  #   Properties:
+  #     ParentId: !Ref PprmrApiGatewayPresignedBucketResource
+  #     PathPart: "{key}"
+  #     RestApiId: !Ref PprmrApiGateway
+
+  # ApiGatewayStage:
+  #   Type: AWS::ApiGateway::Stage
+  #   Properties:
+  #     DeploymentId: !Ref ApiGatewayDeployment
+  #     Description: API Gateway Stage
+  #     RestApiId: !Ref PprmrApiGateway
+  #     StageName: !Sub "${Environment}"
+
+  #API Gateway log
+  ApiGatewayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "${APIRestApiName}-loggrp"
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ApiGatewayGetBucketMethod
+      - ApiGatewayGetBucketPresignedUrlMethod
+      - ApiGatewayS3BucketMethodOptions
+      - ApiGatewayGetBucketPresignedUrlMethodOptions
+      - APIClientCertificate
+    Properties:
+      Description: API Deployment
+      RestApiId: !Ref PprmrApiGateway
+      StageName: !Sub "${Environment}"
+      # # LoggingLevel: INFO
+      # # MetricsEnabled: True
+      # MethodSettings:
+      #   - ResourcePath: "/*"
+      #     HttpMethod: "*"
+      #     LoggingLevel: INFO
+      #     MetricsEnabled: True
+      StageDescription:
+
+        AccessLogSetting:
+          DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
+          Format: '{"apiId":"$context.apiId","stage":"$context.stage","resourcePath":"$context.resourcePath","requestId":"$context.requestId","awsEndpointRequestId":"$context.awsEndpointRequestId","xrayTraceId":"$context.xrayTraceId","requestTime":"$context.requestTime","requestTimeEpoch":$context.requestTimeEpoch,"httpMethod":"$context.httpMethod","status":"$context.status","path":"$context.path"}'
+        MethodSettings:
+          - MetricsEnabled: True
+            ResourcePath: '/*'
+            HttpMethod: '*'
+        LoggingLevel: INFO
+        MetricsEnabled: true
+        DataTraceEnabled: true
+        TracingEnabled: true
+        ClientCertificateId: !Ref APIClientCertificate
+
+  ApiCWLRoleArn:
+    Type: AWS::ApiGateway::Account
+    Properties: 
+      CloudWatchRoleArn: !GetAtt PprmrApiGatewayRole.Arn
+
+  # IAM Role for API GW + CWL
+  # CloudWatchRole:
+  #     Type: "AWS::IAM::Role"
+  #     Properties:
+  #       PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+  #       RoleName: "techops-eng-dev-api-cw-role"
+  #       AssumeRolePolicyDocument:
+  #         Version: '2012-10-17'
+  #         Statement:
+  #           Action: 'sts:AssumeRole'
+  #           Effect: Allow
+  #           Principal:
+  #             Service: apigateway.amazonaws.com
+  #       Path: /
+  #       ManagedPolicyArns:
+  #         - 'arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs'
+
+  #Get Bucket Contents Endpoint
+  ApiGatewayGetBucketMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      # AuthorizationType: NONE
+      AuthorizationType: "Custom"
+      AuthorizerId: !Ref ApiBucketAuthorizer
+      HttpMethod: GET
+      Integration:
+        ConnectionType: INTERNET
+        Credentials: !GetAtt PprmrApiGatewayRole.Arn
+        IntegrationHttpMethod: GET
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              { "method.response.header.Access-Control-Allow-Origin": "'*'" }
+          - StatusCode: 400
+            SelectionPattern: 4\d{2}
+            ResponseParameters:
+              { "method.response.header.Access-Control-Allow-Origin": "'*'" }
+          - StatusCode: 500
+            SelectionPattern: 5\d{2}
+            ResponseParameters:
+              { "method.response.header.Access-Control-Allow-Origin": "'*'" }
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters:
+          integration.request.path.bucket: method.request.path.bucket
+        Type: AWS
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:s3:path/{bucket}"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: { "application/xml": "Empty" }
+          ResponseParameters:
+            { "method.response.header.Access-Control-Allow-Origin": false }
+        - StatusCode: 400
+          ResponseParameters:
+            { "method.response.header.Access-Control-Allow-Origin": false }
+        - StatusCode: 500
+          ResponseParameters:
+            { "method.response.header.Access-Control-Allow-Origin": false }
+      RequestParameters:
+        method.request.path.bucket: false
+      ResourceId: !Ref PprmrApiGatewayBucketResource
+      RestApiId: !Ref PprmrApiGateway
+
+  #Option Method S3 Bucket URL
+  ApiGatewayS3BucketMethodOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: OPTIONS
+      Integration:
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: OPTIONS
+        PassthroughBehavior: WHEN_NO_MATCH
+        Type: MOCK
+        RequestTemplates: { "application/json": "{\"statusCode\": 200}" }
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'",
+              }
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: { "application/json": "Empty" }
+          ResponseParameters:
+            {
+              "method.response.header.Access-Control-Allow-Origin": false,
+              "method.response.header.Access-Control-Allow-Headers": false,
+              "method.response.header.Access-Control-Allow-Methods": false,
+            }
+      RequestParameters:
+        method.request.path.bucket: false
+      ResourceId: !Ref PprmrApiGatewayBucketResource
+      RestApiId: !Ref PprmrApiGateway
+
+  # #Get Presigned URL
+  # ApiGatewayGetPresignedUrlMethod:
+  #   Type: AWS::ApiGateway::Method
+  #   Properties:
+  #     ApiKeyRequired: false
+  #     # AuthorizationType: NONE
+  #     AuthorizationType: "Custom"
+  #     AuthorizerId: !Ref ApiPresignedAuthorizer
+  #     HttpMethod: GET
+  #     Integration:
+  #       ConnectionType: INTERNET
+  #       #Credentials: !GetAtt PprmrApiGatewayRole.Arn
+  #       IntegrationHttpMethod: POST
+  #       PassthroughBehavior: WHEN_NO_MATCH
+  #       Type: AWS_PROXY
+  #       RequestTemplates: { "application/json": "" }
+  #       Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PprmrPresgnUrlFunction.Arn}/invocations"
+  #       IntegrationResponses:
+  #         - ResponseTemplates:
+  #             application/json: ""
+  #           StatusCode: 200
+  #     MethodResponses:
+  #       - StatusCode: 200
+  #         ResponseModels: { "application/json": "Empty" }
+  #         ResponseParameters:
+  #           { "method.response.header.Access-Control-Allow-Origin": false }
+  #       - StatusCode: 400
+  #         ResponseParameters:
+  #           { "method.response.header.Access-Control-Allow-Origin": false }
+  #       - StatusCode: 500
+  #         ResponseParameters:
+  #           { "method.response.header.Access-Control-Allow-Origin": false }
+  #     RequestParameters:
+  #       method.request.path.bucket: false
+  #       method.request.path.key: false
+  #       method.request.querystring.method: false
+  #     ResourceId: !Ref PprmrApiGatewayPresignedBucketKeyResource
+  #     RestApiId: !Ref PprmrApiGateway
+
+  # #Option Method Presigned URL
+  # ApiGatewayGetPresignedUrlMethodOptions:
+  #   Type: AWS::ApiGateway::Method
+  #   Properties:
+  #     ApiKeyRequired: false
+  #     AuthorizationType: NONE
+  #     HttpMethod: OPTIONS
+  #     Integration:
+  #       ConnectionType: INTERNET
+  #       IntegrationHttpMethod: OPTIONS
+  #       PassthroughBehavior: WHEN_NO_MATCH
+  #       Type: MOCK
+  #       RequestTemplates: { "application/json": "" }
+  #       IntegrationResponses:
+  #         - StatusCode: 200
+  #           ResponseParameters:
+  #             {
+  #               "method.response.header.Access-Control-Allow-Origin": "'*'",
+  #               "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+  #               "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'",
+  #             }
+  #     MethodResponses:
+  #       - StatusCode: 200
+  #         ResponseModels: { "application/json": "Empty" }
+  #         ResponseParameters:
+  #           {
+  #             "method.response.header.Access-Control-Allow-Origin": false,
+  #             "method.response.header.Access-Control-Allow-Headers": false,
+  #             "method.response.header.Access-Control-Allow-Methods": false,
+  #           }
+  #     RequestParameters:
+  #       method.request.path.bucket: false
+  #       method.request.path.key: false
+  #     ResourceId: !Ref PprmrApiGatewayPresignedBucketKeyResource
+  #     RestApiId: !Ref PprmrApiGateway
+
+  ####New presigned URL
+  #Get Presigned URL
+  ApiGatewayGetBucketPresignedUrlMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      # AuthorizationType: NONE
+      AuthorizationType: "Custom"
+      AuthorizerId: !Ref ApiPresignedAuthorizer
+      HttpMethod: GET
+      Integration:
+        ConnectionType: INTERNET
+        #Credentials: !GetAtt PprmrApiGatewayRole.Arn
+        IntegrationHttpMethod: POST
+        PassthroughBehavior: WHEN_NO_MATCH
+        Type: AWS_PROXY
+        RequestTemplates: { "application/json": "" }
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PprmrPresgnUrlFunction.Arn}/invocations"
+        IntegrationResponses:
+          - ResponseTemplates:
+              application/json: ""
+            StatusCode: 200
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: { "application/json": "Empty" }
+          ResponseParameters:
+            { "method.response.header.Access-Control-Allow-Origin": false }
+        - StatusCode: 400
+          ResponseParameters:
+            { "method.response.header.Access-Control-Allow-Origin": false }
+        - StatusCode: 500
+          ResponseParameters:
+            { "method.response.header.Access-Control-Allow-Origin": false }
+      RequestParameters:
+        method.request.path.bucket: false
+        method.request.querystring.key: false
+        method.request.querystring.method: false
+      ResourceId: !Ref PprmrApiGatewayPresignedBucketResource
+      RestApiId: !Ref PprmrApiGateway
+
+  #Option Method Presigned URL
+  ApiGatewayGetBucketPresignedUrlMethodOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: OPTIONS
+      Integration:
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: OPTIONS
+        PassthroughBehavior: WHEN_NO_MATCH
+        Type: MOCK
+        RequestTemplates: { "application/json": "{\"statusCode\": 200}" }
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'",
+              }
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: { "application/json": "Empty" }
+          ResponseParameters:
+            {
+              "method.response.header.Access-Control-Allow-Origin": false,
+              "method.response.header.Access-Control-Allow-Headers": false,
+              "method.response.header.Access-Control-Allow-Methods": false,
+            }
+      RequestParameters:
+        method.request.path.bucket: false
+      ResourceId: !Ref PprmrApiGatewayPresignedBucketResource
+      RestApiId: !Ref PprmrApiGateway
+
+  #Certificate
+  APICustomDomain:
+    Type: AWS::ApiGateway::DomainName
+    # DependsOn: APICustomCertificate
+    Properties:
+      DomainName: !Ref APICustomUri
+      EndpointConfiguration:
+        Types:
+          - !Ref APICustomDomainEndpointType
+      RegionalCertificateArn: !Ref APICustomCertificate
+      SecurityPolicy: TLS_1_2
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  APICustomDomainMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    # DependsOn: APICustomDomain
+    Properties:
+      # BasePath: !Ref APIStageID
+      DomainName: !Ref APICustomDomain
+      RestApiId: !Ref PprmrApiGateway
+      Stage: !Sub "${Environment}"
+
+  APICustomCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      CertificateAuthorityArn: !Ref CertificateAuthorityArnValue
+      CertificateTransparencyLoggingPreference: DISABLED
+      DomainName: !Ref APICustomUri
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  APICustomRoute53:
+    Type: AWS::Route53::RecordSetGroup
+    DependsOn: APICustomDomain
+    Properties:
+      #HostedZoneName: !Ref Route53HostedZone
+      HostedZoneId: !Ref APIHostedZoneId
+      RecordSets:
+        - Name: !Ref APICustomUri
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt APICustomDomain.RegionalDomainName
+            HostedZoneId: !GetAtt APICustomDomain.RegionalHostedZoneId
+
+  #SPA
+  # Configure the bucket as a CloudFront Origin
+  ReadPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    DependsOn:
+      - CloudFrontOriginAccessIdentity
+    Properties:
+      Bucket: !Ref SPABucketName
+      PolicyDocument:
+        Statement:
+          - Action: "s3:GetObject"
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${SPABucketName}/*"
+            Principal:
+              CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+          - Effect: Deny
+            Principal: "*"
+            Resource: !Sub "arn:aws:s3:::${SPABucketName}"
+            Action: "s3:*"
+            Condition:
+              Bool:
+                "aws:SecureTransport": false
+
+
+  CloudFrontOriginAccessIdentity:
+    Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Ref SPABucketName
+
+  DomainCNameRecordSet:
+    Type: AWS::Route53::RecordSet
+    DependsOn: CFDistribution
+    Properties:
+      HostedZoneId: !Ref SPAHostedZoneId
+      Name: !Ref SPACustomUri
+      ResourceRecords:
+        - !GetAtt CFDistribution.DomainName
+      TTL: 900
+      Type: CNAME
+
+  CloudFrontResponseHeadersPolicy:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties: 
+      ResponseHeadersPolicyConfig:
+        Name: !Ref SPACloudfrontHeaderPolicyConfig 
+        CustomHeadersConfig: 
+          Items: 
+            - Header: "Server"
+              Value: ""
+              Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
+        SecurityHeadersConfig: 
+          ContentTypeOptions: 
+            Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
+          FrameOptions: 
+            FrameOption: "SAMEORIGIN"
+            Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
+          StrictTransportSecurity: 
+            AccessControlMaxAgeSec: 31536000
+            Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
+          XSSProtection: 
+            Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
+            Protection: true
+          ContentSecurityPolicy:
+            ContentSecurityPolicy: !Ref SPACloudfrontContentSecurityPolicy
+            Override: !Ref SPACloudfrontOriginHeaderPolicyOverride
+
+
+
+
+  CloudFrontCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        DefaultTTL: 86400
+        MaxTTL: 31536000
+        MinTTL: 1
+        Name: LambdaAtEdgeCachePolicy
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: "none"
+          EnableAcceptEncodingBrotli: "true"
+          EnableAcceptEncodingGzip: "true"
+          HeadersConfig:
+            HeaderBehavior: "none"
+          QueryStringsConfig:
+            QueryStringBehavior: "none"
+
+  #Certificate
+  DomainCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref SPACustomUri
+      DomainValidationOptions:
+        - DomainName: !Ref SPACustomUri
+          HostedZoneId: !Ref SPAHostedZoneId
+      ValidationMethod: DNS
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  ################## LAMBDA@EDGE ##################
+  LambdaEdgeFunctionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Ref LambdaAtEdgeRoleName 
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub "arn:aws:s3:::${LambdaAtEdgeCodeBucket}/*"
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: arn:aws:secretsmanager:*:*:*  
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Sid: "AllowLambdaServiceToAssumeRole"
+            Effect: "Allow"
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+                - "edgelambda.amazonaws.com"
+
+  ViewerRequestLambdaAtEdgeFunction:
+    DependsOn:
+      - LambdaEdgeFunctionRole
+      - LambdaAtEdgeSecret
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaAtEdgeFunctionName
+      Description: Lambda@Edge triggered by viewer request in Cloudfront distribution
+      Handler: src/viewer_request.handler
+      Runtime: nodejs12.x
+      Role: !GetAtt LambdaEdgeFunctionRole.Arn
+      Timeout: 5
+      Code:
+        S3Bucket: !Ref LambdaAtEdgeCodeBucket
+        S3Key: !Ref LambdaAtEdgeCodeArtifact
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  ViewerRequestLambdaFunctionVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref ViewerRequestLambdaAtEdgeFunction
+      Description: Newly deployed version
+        
+  LambdaAtEdgeSecret: 
+    Type: "AWS::SecretsManager::Secret"
+    Properties: 
+      Name: !Ref SecretName
+      Description: "This secret is used by the request viewer lambda@edge function"
+      SecretString: !Sub |-
+        {
+          "PUBLIC_KEY": "${PublicKey}",
+          "PRIVATE_KEY": "${PrivateKey}"
+        }
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  CFDistribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn:
+      - DomainCertificate
+      - CloudFrontResponseHeadersPolicy
+      # - LambdaAtEdgePermission
+      - ViewerRequestLambdaFunctionVersion
+    Properties:
+      DistributionConfig:
+        WebACLId: !GetAtt AppWebACL.Arn
+        PriceClass: "PriceClass_100"
+        Enabled: "true"
+        Logging:
+            Bucket: !Sub ${S3LogsBucketName}.s3.amazonaws.com
+            IncludeCookies: false
+            Prefix: pprmr-cloudfront-logs/
+
+        Aliases:
+          - !Ref SPACustomUri
+        ViewerCertificate:
+          AcmCertificateArn: !Ref DomainCertificate
+          MinimumProtocolVersion: "TLSv1.2_2021"
+          SslSupportMethod: "sni-only"
+        Origins:
+          - DomainName: !Sub ${SPABucketName}.s3.amazonaws.com
+            Id: myS3Origin
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
+        Comment: Serve static content from private S3 bucket with SSO login
+        DefaultRootObject: index.html
+        CustomErrorResponses:
+          - ErrorCachingMinTTL: 216000
+            ErrorCode: 403
+            ResponsePagePath: /index.html
+            ResponseCode: 403
+          - ErrorCachingMinTTL: 216000
+            ErrorCode: 404
+            ResponsePagePath: /index.html
+            ResponseCode: 404
+        DefaultCacheBehavior:
+          TargetOriginId: myS3Origin
+          LambdaFunctionAssociations:
+            -
+              EventType: viewer-request
+              #LambdaFunctionARN: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaAtEdgeFunctionName}:1
+              LambdaFunctionARN: !Ref ViewerRequestLambdaFunctionVersion
+          CachePolicyId: !Ref CloudFrontCachePolicy
+          # OriginRequestPolicyId: !Ref CloudFrontOriginRequestPolicy
+          ViewerProtocolPolicy: "redirect-to-https"
+          ResponseHeadersPolicyId: !Ref CloudFrontResponseHeadersPolicy
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+  
+  AppWebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Ref SPAWebACLName
+      Scope: CLOUDFRONT
+      Description: PDF PW Remover Web App WAF
+      DefaultAction:
+        Allow:  {}
+      VisibilityConfig:
+        SampledRequestsEnabled: false
+        CloudWatchMetricsEnabled: true
+        MetricName: !Ref SPAWebACLName
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  APIWebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Ref APIWebACLName
+      Scope: REGIONAL
+      Description: PDF PW Remover API App WAF
+      DefaultAction:
+        Allow:  {}
+      VisibilityConfig:
+        SampledRequestsEnabled: false
+        CloudWatchMetricsEnabled: true
+        MetricName: !Ref APIWebACLName
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+  APIWebACLAssoc:
+    Type: AWS::WAFv2::WebACLAssociation
+    DependsOn: 
+      - APIWebACL
+      - ApiGatewayDeployment
+    Properties: 
+      ResourceArn: !Sub arn:aws:apigateway:${AWS::Region}::/restapis/${PprmrApiGateway}/stages/${Environment}
+      WebACLArn: !GetAtt APIWebACL.Arn
+
+  APIClientCertificate:
+    Type: 'AWS::ApiGateway::ClientCertificate'
+    Properties:
+      Description: PDF PW Remover API Client Certificate
+      Tags:
+        - Key: costCenter
+          Value: !Ref CostCenter
+        - Key: uniqueID
+          Value: !Ref UniqueID
+        - Key: dataClassification
+          Value: !Ref DataClassification
+        - Key: supportGroup
+          Value: !Ref SupportGroup
+        - Key: changeGroup
+          Value: !Ref ChangeGroup
+        - Key: blockcode
+          Value: !Ref Blockcode
+        - Key: drTier
+          Value: !Ref DrTier
+        - Key: pciIndicator
+          Value: !Ref PciIndicator
+        - Key: phiIndicator
+          Value: !Ref PhiIndicator
+        - Key: soxIndicator
+          Value: !Ref SoxIndicator
+        - Key: cuiIndicator
+          Value: !Ref CuiIndicator
+
+
+
+  # SPAWebACL: 
+  #   Type: "AWS::WAF::WebACL"
+  #   Properties: 
+  #     Name: !Ref SPAWebACLName
+  #     DefaultAction: 
+  #       Type: "ALLOW"
+  #     MetricName: !Ref SPAWebACLName
+      # Rules: 
+      #   - 
+      #     Action: 
+      #       Type: "BLOCK"
+      #     Priority: 1
+      #     RuleId: 
+      #       Ref: "MyRule"
+      #   - 
+      #     Action: 
+      #       Type: "BLOCK"
+      #     Priority: 2
+      #     RuleId: 
+      #       Ref: "BadReferersRule"
+      #   - 
+      #     Action: 
+      #       Type: "BLOCK"
+      #     Priority: 3
+      #     RuleId: 
+      #       Ref: "SqlInjRule"
+
+Outputs:
+  UploadedFilesS3Bucket:
+    Description: S3 Bucket for uploaded PDF files
+    Value: !Sub "${UploadFilesBucketName}"
+
+  ConvertedFilesS3Bucket:
+    Description: S3 Bucket for converted PDF files
+    Value: !Sub "${ConvertedFilesBucketName}"
+
+  S3LogsS3Bucket:
+    Description: S3 Bucket for S3 Logs
+    Value: !Sub "${S3LogsBucketName}"
+
+  PdfPwRemoverLambdaFunc:
+    Description: PDF Pw Remover Lambda Function that removes pw permission from PDF
+    Value: !GetAtt PprmrLambdaFunction.Arn
+
+  PdfPwRemoverPresignUrlLambdaFunc:
+    Description: PDF Pw Remover Lambda Function that returns S3 Presigned URL
+    Value: !GetAtt PprmrPresgnUrlFunction.Arn
+
+  PdfPwRemoverApiGateway:
+    Description: PDF Pw Remover API Gateway
+    Value: !Ref PprmrApiGateway
+
+  PdfPwRemoveDomainName:
+    Description: PDF Pw Remover API URL
+    Value: !Ref APICustomUri
+
+  SPADomainName:
+    Description: PDF Pw Remover SPA URL
+    Value: !Ref SPACustomUri

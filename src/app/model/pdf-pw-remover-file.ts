@@ -1,3 +1,4 @@
+
 export interface FileDetails {
   fileName: string;
   fileKey: string;
@@ -24,3 +25,18 @@ export interface S3Content {
   SIZE: string;
   LASTMODIFIED: Date;
 }
+
+
+export interface UserProfile {
+  info: UserInfo;
+}
+
+export interface UserInfo{
+  ppr: string;
+  preferred_username: string;
+  given_name: string;
+  family_name: string;
+  station: string;
+  name: string;
+}
+

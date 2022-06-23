@@ -1,0 +1,9 @@
+.unauthorized-message, .pi-exclamation-circle {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.unauthorized-message-container {
+    margin-top: 10rem;  
+    text-align: center;
+}

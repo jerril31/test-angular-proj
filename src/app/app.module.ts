@@ -20,6 +20,11 @@ import { LoaderComponent } from './layout/loader/loader.component';
 import { NgxFilesizeModule } from 'ngx-filesize';
 import { HeaderComponent } from './layout/header/header/header.component';
 import { FooterComponent } from './layout/footer/footer/footer.component';
+import { OAuthModule } from 'angular-oauth2-oidc';
+import {  HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HeaderInterceptor } from 'src/app/service/header.interceptor';
+import { CookieService } from 'ngx-cookie-service';
+import { UnauthorizedComponent } from './module/unauthorized/unauthorized.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +34,7 @@ import { FooterComponent } from './layout/footer/footer/footer.component';
     LoaderComponent,
     HeaderComponent,
     FooterComponent,
+    UnauthorizedComponent,
   ],
   imports: [
     BrowserModule,
@@ -42,8 +48,14 @@ import { FooterComponent } from './layout/footer/footer/footer.component';
     BrowserAnimationsModule,
     NgxFilesizeModule,
     DividerModule,
+    OAuthModule.forRoot(),
   ],
-  providers: [],
+  providers: [CookieService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HeaderInterceptor,
+      multi: true,
+    }],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
