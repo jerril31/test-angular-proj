@@ -1,4 +1,4 @@
-.unauthorized-message {
+.unauthorized-message, .pi-exclamation-circle {
   font-size: 30px;
   font-weight: bold;
 }
