@@ -10,17 +10,17 @@ const routes: Routes = [
   {
     //View Files
     path: AppConstant.URL_VIEW_CONVERTED_FILES,
-    component: ViewFilesComponent,  canActivate: [AuthguardService]
+    component: ViewFilesComponent
   },
   {
     //Upload Files
     path: AppConstant.URL_UPLOAD_FILES,
-    component: UploadFilesComponent, canActivate: [AuthguardService]
+    component: UploadFilesComponent
   },
   {
     //Callback after OIDC
     path: AppConstant.URL_CALLBACK,
-    component: UploadFilesComponent, canActivate: [AuthguardService]
+    component: UploadFilesComponent
   },
   {
     //Unauthorized page

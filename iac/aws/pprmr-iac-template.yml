@@ -199,28 +199,28 @@ Parameters:
   ##S3 Buckets
   UploadFilesBucketName:
     Type: String
-    Default: "techops-eng-dev-pprmr-uploaded-files-s3"
+    Default: "techops-eng-dev-pprmr-uploaded-files-temp-s3"
     Description: "S3 bucket to host uploaded PDF files"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
   ConvertedFilesBucketName:
     Type: String
-    Default: "techops-eng-dev-pprmr-converted-files-s3"
+    Default: "techops-eng-dev-pprmr-converted-files-temp-s3"
     Description: "S3 bucket to host processed PDF files"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
   S3LogsBucketName:
     Type: String
-    Default: "techops-eng-dev-pprmr-logs-s3"
+    Default: "techops-eng-dev-pprmr-logs-temp-s3"
     Description: "S3 bucket to host S3 logs"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
   PprmrLambdaCodeBucket:
     Type: String
-    Default: "techops-eng-dev-pprmr-lambdacode-s3"
+    Default: "techops-eng-dev-pprmr-lambdacode-temp-s3"
     Description: "S3 bucket that contains lambda function java project"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
@@ -232,7 +232,7 @@ Parameters:
 
   APIRestApiName:
     Type: String
-    Default: "techops-eng-dev-pprmr-api"
+    Default: "techops-eng-dev-pprmr-temp-api"
     Description: "PDF Pwd Remover API Gateway Name"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]api$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
@@ -240,7 +240,7 @@ Parameters:
   APICustomUri:
     Type: String
     Description: "The name of the stage to deploy the API to."
-    Default: "pdfpwdrmr-api.tech-eng-doc-dev.aws.delta.com"
+    Default: "pdfpwdrmr-temp-api.tech-eng-doc-dev.aws.delta.com"
 
   # Route53HostedZone:
   #   Type: String
@@ -281,35 +281,35 @@ Parameters:
   LambdaRoleName:
     Type: String
     Description: Enter the Lambda role name
-    Default: delegate-admin-techops-eng-dev-pprmr-lambda-access-role
+    Default: delegate-admin-techops-eng-dev-pprmr-lambda-access-temp-role
     AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]role$
     MaxLength: 64
 
   ApiRoleName:
     Type: String
     Description: Enter the API Gateway role name
-    Default: delegate-admin-techops-eng-dev-pprmr-api-gateway-access-role
+    Default: delegate-admin-techops-eng-dev-pprmr-api-gateway-acs-temp-role
     AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]role$
     MaxLength: 64
 
   LambdaPolicyName:
     Type: String
     Description: Enter the Lambda Policy name
-    Default: delegate-admin-techops-eng-dev-pprmr-lambda-policy
+    Default: delegate-admin-techops-eng-dev-pprmr-lambda-temp-policy
     AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]policy$
     MaxLength: 64
 
   ApiPolicyName:
     Type: String
     Description: Enter the API Gateway Policy name
-    Default: delegate-admin-techops-eng-dev-pprmr-api-policy
+    Default: delegate-admin-techops-eng-dev-pprmr-api-temp-policy
     AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]policy$
     MaxLength: 64
 
   PprmrLambdaFunctionName:
     Type: String
     Description: Enter the Lambda function name
-    Default: techops-eng-dev-pprmr-lambda
+    Default: techops-eng-dev-pprmr-temp-lambda
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
     MaxLength: 64
 
@@ -326,7 +326,7 @@ Parameters:
   PprmrPresignedLambdaFunctionName:
     Type: String
     Description: Enter the Presigned Lambda function name
-    Default: techops-eng-dev-pprmr-prsgn-url-lambda
+    Default: techops-eng-dev-pprmr-prsgn-url-temp-lambda
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
     MaxLength: 64
 
@@ -343,7 +343,7 @@ Parameters:
   #SPA
   SPABucketName:
     Type: String
-    Default: "techops-eng-dev-pprmr-spa-s3"
+    Default: "techops-eng-dev-pprmr-spa-temp-s3"
     Description: "S3 bucket to host PDF Password Remover SPA"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
@@ -357,12 +357,12 @@ Parameters:
   SPACustomUri:
     Type: String
     Description: "SPA URL."
-    Default: "pdfpwdrmr.tech-eng-doc-dev.pub.delta.com"
+    Default: "pdfpwdrmr-temp.tech-eng-doc-dev.pub.delta.com"
     #Default: "tech-eng-doc-dev.aws.delta.com"
 
   SPACloudfrontHeaderPolicyConfig:
     Type: String
-    Default: "techops-eng-dev-pprmr-spa-res-header-policy"
+    Default: "techops-eng-dev-pprmr-spa-res-header-temp-policy"
     Description: "Name for Cloudfront Response Header Policy"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]policy$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
@@ -382,81 +382,81 @@ Parameters:
    
   TopicName:
     Type: String
-    Default: "techops-eng-dev-pprmr-s3-topic"
+    Default: "techops-eng-dev-pprmr-s3-temp-topic"
     Description: "S3 Bucket Event Notif Topic"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]topic$
 
   SPAWebACLName:
     Type: String
-    Default: "techops-eng-dev-pprmr-spa-waf"
+    Default: "techops-eng-dev-pprmr-spa-temp-waf"
     Description: "SPA Web ACL"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]waf$
 
   APIWebACLName:
     Type: String
-    Default: "techops-eng-dev-pprmr-api-waf"
+    Default: "techops-eng-dev-pprmr-api-temp-waf"
     Description: "API Web ACL"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]waf$
 
-  LambdaAtEdgeCodeBucket:
-    Type: String
-    Default: "techops-eng-dev-pprmr-lambda-edge-s3"
-    Description: "S3 bucket that contains lambda function java project"
-    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
-    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+  # LambdaAtEdgeCodeBucket:
+  #   Type: String
+  #   Default: "techops-eng-dev-pprmr-lambda-edge-s3"
+  #   Description: "S3 bucket that contains lambda function java project"
+  #   AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+  #   ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
-  LambdaAtEdgeCodeArtifact:
-    Type: String
-    Default: "lambda-at-edge-code.zip"
-    Description: "S3 bucket file that contains lambda at edge codes"
+  # LambdaAtEdgeCodeArtifact:
+  #   Type: String
+  #   Default: "lambda-at-edge-code.zip"
+  #   Description: "S3 bucket file that contains lambda at edge codes"
   
-  LambdaAtEdgeFunctionName:
-    Type: String
-    Description: Enter the Lambda At Edge function name
-    Default: techops-eng-dev-pprmr-lambda-at-edge-lambda
-    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
+  # LambdaAtEdgeFunctionName:
+  #   Type: String
+  #   Description: Enter the Lambda At Edge function name
+  #   Default: techops-eng-dev-pprmr-lambda-at-edge-lambda
+  #   AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
 
-  LambdaAtEdgeRoleName:
-    Type: String
-    Description: Enter the Lambda role name
-    Default: delegate-admin-techops-eng-dev-pprmr-lambda-at-edge-role
-    AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]role$
-    MaxLength: 64
+  # LambdaAtEdgeRoleName:
+  #   Type: String
+  #   Description: Enter the Lambda role name
+  #   Default: delegate-admin-techops-eng-dev-pprmr-lambda-at-edge-role
+  #   AllowedPattern: ^delegate-admin-techops-eng[-](dev|si|prd)[-](.*?)[-]role$
+  #   MaxLength: 64
 
-  SecretName:
-    Type: String
-    Description: 'Name of the secrets used in viewer request'  
-    Default: "techops-eng-dev-pprmr-lambda-edge-secret"
-    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]secret$
+  # SecretName:
+  #   Type: String
+  #   Description: 'Name of the secrets used in viewer request'  
+  #   Default: "techops-eng-dev-pprmr-lambda-edge-secret"
+  #   AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]secret$
 
-  PublicKey:
-    Type: String
-    Default: "-----BEGIN PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwwEGGNmy9gRxAPd964wI\\nUPDNnd6agaoiCMnnrQO+oVrVfP3LcZC9WmrSL2y1dVCJd/HQatB4+8jsGCKvJp6q\\nO4kQ/wd8mhAeKDT6kwVoERjXJsiVIv/xCXP0D/U5TAhbuasUq1f14rmiGIZhfCVD\\ntbpc7R+qbAm7kAWnqIdR92XhN3VirknhmaHgpJCW8MNEOj4z3CdIecd8elY2D71B\\n59z9CCyEeLDJENVuqknPukVrDF6ISDieK1dro2UaaFC7hY0rpuAWGkJkcSBGPeLp\\nNQFPRMrOyt/+fp27XR6HuBBPS5ah/1FXbtNpK7jI1AS9LxdE7O1ZnY00AJPvyiZ7\\n1QIDAQAB\\n-----END PUBLIC KEY-----\\n"
-    Description: 'Public key value used to sign synthetic TOKEN'  
+  # PublicKey:
+  #   Type: String
+  #   Default: "-----BEGIN PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwwEGGNmy9gRxAPd964wI\\nUPDNnd6agaoiCMnnrQO+oVrVfP3LcZC9WmrSL2y1dVCJd/HQatB4+8jsGCKvJp6q\\nO4kQ/wd8mhAeKDT6kwVoERjXJsiVIv/xCXP0D/U5TAhbuasUq1f14rmiGIZhfCVD\\ntbpc7R+qbAm7kAWnqIdR92XhN3VirknhmaHgpJCW8MNEOj4z3CdIecd8elY2D71B\\n59z9CCyEeLDJENVuqknPukVrDF6ISDieK1dro2UaaFC7hY0rpuAWGkJkcSBGPeLp\\nNQFPRMrOyt/+fp27XR6HuBBPS5ah/1FXbtNpK7jI1AS9LxdE7O1ZnY00AJPvyiZ7\\n1QIDAQAB\\n-----END PUBLIC KEY-----\\n"
+  #   Description: 'Public key value used to sign synthetic TOKEN'  
 
-  PrivateKey:
-    Type: String
-    Default: "-----BEGIN PRIVATE KEY-----\\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDDAQYY2bL2BHEA\\n933rjAhQ8M2d3pqBqiIIyeetA76hWtV8/ctxkL1aatIvbLV1UIl38dBq0Hj7yOwY\\nIq8mnqo7iRD/B3yaEB4oNPqTBWgRGNcmyJUi//EJc/QP9TlMCFu5qxSrV/XiuaIY\\nhmF8JUO1ulztH6psCbuQBaeoh1H3ZeE3dWKuSeGZoeCkkJbww0Q6PjPcJ0h5x3x6\\nVjYPvUHn3P0ILIR4sMkQ1W6qSc+6RWsMXohIOJ4rV2ujZRpoULuFjSum4BYaQmRx\\nIEY94uk1AU9Eys7K3/5+nbtdHoe4EE9LlqH/UVdu02kruMjUBL0vF0Ts7VmdjTQA\\nk+/KJnvVAgMBAAECggEAWfFa8pNW7ApYZO3CcqaAH3UyIaLO+QeT8yHNbgvQHXRc\\nC+6zq4nrDI1ArQcjGx0uithKHTpS0y91VhyJVPLR6evqnvbBDf5pKnplKPLRcTFX\\n61eREjei4Y1OAR5Gcz9Xr2etfOpxS0X78fvpcu1tMaDnw6dbX8GNdXxmPGFN+SGA\\nwVYUCTSparT2zJqYlv7ZDrnH4RPg/r+oGfTuxPaKFmpqXTK90ko0V9B29g0nDwqk\\niAudmiFO4F64KnRKGCDv3QapVzEngy39MLPP7ITxjDC6DAtVgCheFT8gE7BJeWMj\\nnMD9+dgM7EnnYuUZKxtvP9QyGdoHB4eZf8ibB1QigQKBgQD+uL57Zvh+bhl1Lakk\\nH8cWcbpR0lWT75lw57NVPnVdNpVbjvqh98FQITXgbUBTtTGcftr2Myrj+OtclCvS\\nCLUdEhY3UtYFYy8IkSTodrMfAEQD08ATgY3eisxUDVaSCH50sEVD+P7ZYJKEiwM1\\nKY5v5M1UVg7ghUsgni1HpfmmPQKBgQDD+46UW0PQmC/A/N8SMFm1rhFk8cTzSh10\\nrQz4pmqxIBVi38L7xC3IHug60JDGejSriUc5R15X6KkqlzKawY0ewZhNVqBq2yQF\\nzrJbxs6DxLn9YpCylalEulqw98S7TbJ3yqvTniMCRTXI18DkDTSHZMAmd/B0IrzD\\n818207odeQKBgQDRYiuyZMJ/qyFiIVaYS0bsPDBccfnG0X3gQZY4zE7NgMDlsnJ0\\nEaTmqWYQRb5LEPbnHaAAIa9wFn3ibCpZTK8UZnm8oGstoopXEHi2Xlx/b0h5nOaX\\nIjfsZ0vvC8fN4w2P/hXx+gwDxE6shVjtqmtbr0jZuqQgC3HmLiAqdVTyQQKBgA2i\\nHz4Ex0foflHvhVkPkf4IeN9LzkaaXkgyjZdyhDOEJti09ixrbj/gnokQ3zFfaPCR\\n4SmD5HU7EyGKWRPY6Qc9smmW4Bvu2KeqxE+MGeuisMmGpMg3jwnf6NUstzvMYODi\\ncWeMNaU/yUkKcTmsDX5prNBAQbLig70h3frDacwJAoGAdlP8J6qIfRYfkTo/hoH0\\n6e0klEHkdw6kiYMLwA1UHKxjs3PUuYrQ4mCdBMsKK+MEA8FRgQRqX+k0KlJTuCpR\\njQlV3xfwqtBE6Cc3rT3KVEm2q6haFSfo0bpFQkgRxRHNW8J4I1I/Kl2CI627D/wo\\nM4vQXImU5Ti5yDsumI9eg54=\\n-----END PRIVATE KEY-----\\n"
-    Description: 'Private key value used to sign synthetic TOKEN'    
+  # PrivateKey:
+  #   Type: String
+  #   Default: "-----BEGIN PRIVATE KEY-----\\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDDAQYY2bL2BHEA\\n933rjAhQ8M2d3pqBqiIIyeetA76hWtV8/ctxkL1aatIvbLV1UIl38dBq0Hj7yOwY\\nIq8mnqo7iRD/B3yaEB4oNPqTBWgRGNcmyJUi//EJc/QP9TlMCFu5qxSrV/XiuaIY\\nhmF8JUO1ulztH6psCbuQBaeoh1H3ZeE3dWKuSeGZoeCkkJbww0Q6PjPcJ0h5x3x6\\nVjYPvUHn3P0ILIR4sMkQ1W6qSc+6RWsMXohIOJ4rV2ujZRpoULuFjSum4BYaQmRx\\nIEY94uk1AU9Eys7K3/5+nbtdHoe4EE9LlqH/UVdu02kruMjUBL0vF0Ts7VmdjTQA\\nk+/KJnvVAgMBAAECggEAWfFa8pNW7ApYZO3CcqaAH3UyIaLO+QeT8yHNbgvQHXRc\\nC+6zq4nrDI1ArQcjGx0uithKHTpS0y91VhyJVPLR6evqnvbBDf5pKnplKPLRcTFX\\n61eREjei4Y1OAR5Gcz9Xr2etfOpxS0X78fvpcu1tMaDnw6dbX8GNdXxmPGFN+SGA\\nwVYUCTSparT2zJqYlv7ZDrnH4RPg/r+oGfTuxPaKFmpqXTK90ko0V9B29g0nDwqk\\niAudmiFO4F64KnRKGCDv3QapVzEngy39MLPP7ITxjDC6DAtVgCheFT8gE7BJeWMj\\nnMD9+dgM7EnnYuUZKxtvP9QyGdoHB4eZf8ibB1QigQKBgQD+uL57Zvh+bhl1Lakk\\nH8cWcbpR0lWT75lw57NVPnVdNpVbjvqh98FQITXgbUBTtTGcftr2Myrj+OtclCvS\\nCLUdEhY3UtYFYy8IkSTodrMfAEQD08ATgY3eisxUDVaSCH50sEVD+P7ZYJKEiwM1\\nKY5v5M1UVg7ghUsgni1HpfmmPQKBgQDD+46UW0PQmC/A/N8SMFm1rhFk8cTzSh10\\nrQz4pmqxIBVi38L7xC3IHug60JDGejSriUc5R15X6KkqlzKawY0ewZhNVqBq2yQF\\nzrJbxs6DxLn9YpCylalEulqw98S7TbJ3yqvTniMCRTXI18DkDTSHZMAmd/B0IrzD\\n818207odeQKBgQDRYiuyZMJ/qyFiIVaYS0bsPDBccfnG0X3gQZY4zE7NgMDlsnJ0\\nEaTmqWYQRb5LEPbnHaAAIa9wFn3ibCpZTK8UZnm8oGstoopXEHi2Xlx/b0h5nOaX\\nIjfsZ0vvC8fN4w2P/hXx+gwDxE6shVjtqmtbr0jZuqQgC3HmLiAqdVTyQQKBgA2i\\nHz4Ex0foflHvhVkPkf4IeN9LzkaaXkgyjZdyhDOEJti09ixrbj/gnokQ3zFfaPCR\\n4SmD5HU7EyGKWRPY6Qc9smmW4Bvu2KeqxE+MGeuisMmGpMg3jwnf6NUstzvMYODi\\ncWeMNaU/yUkKcTmsDX5prNBAQbLig70h3frDacwJAoGAdlP8J6qIfRYfkTo/hoH0\\n6e0klEHkdw6kiYMLwA1UHKxjs3PUuYrQ4mCdBMsKK+MEA8FRgQRqX+k0KlJTuCpR\\njQlV3xfwqtBE6Cc3rT3KVEm2q6haFSfo0bpFQkgRxRHNW8J4I1I/Kl2CI627D/wo\\nM4vQXImU5Ti5yDsumI9eg54=\\n-----END PRIVATE KEY-----\\n"
+  #   Description: 'Private key value used to sign synthetic TOKEN'    
 
-  LambdaAuthzFunctionName:
-    Type: String
-    Description: Enter the API GW Lambda Authorizer function name
-    Default: techops-eng-dev-pprmr-lambda-authz-lambda
-    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
+  # LambdaAuthzFunctionName:
+  #   Type: String
+  #   Description: Enter the API GW Lambda Authorizer function name
+  #   Default: techops-eng-dev-pprmr-lambda-authz-lambda
+  #   AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]lambda$
 
 
-  ApiPresignedAuthorizerName:
-    Type: String
-    Description: Enter Authorizer Name for the API Gateway Presigned Method Authorizer
-    Default: techops-eng-dev-pprmr-ping-signature-presigned-authorizer
-    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]authorizer$
+  # ApiPresignedAuthorizerName:
+  #   Type: String
+  #   Description: Enter Authorizer Name for the API Gateway Presigned Method Authorizer
+  #   Default: techops-eng-dev-pprmr-ping-signature-presigned-authorizer
+  #   AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]authorizer$
 
-  ApiBucketAuthorizerName:
-    Type: String
-    Description: Enter Authorizer Name for the API Gateway Bucket Method Authorizer
-    Default: techops-eng-dev-pprmr-ping-signature-bucket-authorizer
-    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]authorizer$
+  # ApiBucketAuthorizerName:
+  #   Type: String
+  #   Description: Enter Authorizer Name for the API Gateway Bucket Method Authorizer
+  #   Default: techops-eng-dev-pprmr-ping-signature-bucket-authorizer
+  #   AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]authorizer$
 
 Resources:
   #####S3 Buckets#####
@@ -918,43 +918,43 @@ Resources:
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
 
-  #API GW Presigned Authorizer
-  ApiPresignedAuthorizer:
-    Type: AWS::ApiGateway::Authorizer
-    Properties: 
-      AuthorizerUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}/invocations"
-      RestApiId: !Ref PprmrApiGateway
-      Type: "TOKEN"
-      IdentitySource: method.request.header.Authorization
-      Name: !Sub "${ApiPresignedAuthorizerName}"
+  # #API GW Presigned Authorizer
+  # ApiPresignedAuthorizer:
+  #   Type: AWS::ApiGateway::Authorizer
+  #   Properties: 
+  #     AuthorizerUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}/invocations"
+  #     RestApiId: !Ref PprmrApiGateway
+  #     Type: "TOKEN"
+  #     IdentitySource: method.request.header.Authorization
+  #     Name: !Sub "${ApiPresignedAuthorizerName}"
 
 
-   #API GW Get Bucket Authorizer
-  ApiBucketAuthorizer:
-    Type: AWS::ApiGateway::Authorizer
-    Properties: 
-      AuthorizerUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}/invocations"
-      RestApiId: !Ref PprmrApiGateway
-      Type: "TOKEN"
-      IdentitySource: method.request.header.Authorization
-      Name: !Sub "${ApiBucketAuthorizerName}"
+  #  #API GW Get Bucket Authorizer
+  # ApiBucketAuthorizer:
+  #   Type: AWS::ApiGateway::Authorizer
+  #   Properties: 
+  #     AuthorizerUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}/invocations"
+  #     RestApiId: !Ref PprmrApiGateway
+  #     Type: "TOKEN"
+  #     IdentitySource: method.request.header.Authorization
+  #     Name: !Sub "${ApiBucketAuthorizerName}"
 
-  #AUthorizer Permissions
-  ApiBucketAuthorizerPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Sub "arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}"
-      Principal: "apigateway.amazonaws.com"
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PprmrApiGateway}/authorizers/${ApiBucketAuthorizer}" 
+  # #AUthorizer Permissions
+  # ApiBucketAuthorizerPermission:
+  #   Type: "AWS::Lambda::Permission"
+  #   Properties:
+  #     Action: lambda:InvokeFunction
+  #     FunctionName: !Sub "arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}"
+  #     Principal: "apigateway.amazonaws.com"
+  #     SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PprmrApiGateway}/authorizers/${ApiBucketAuthorizer}" 
 
-  ApiPresignedAuthorizerPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Sub "arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}"
-      Principal: "apigateway.amazonaws.com"
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PprmrApiGateway}/authorizers/${ApiPresignedAuthorizer}" 
+  # ApiPresignedAuthorizerPermission:
+  #   Type: "AWS::Lambda::Permission"
+  #   Properties:
+  #     Action: lambda:InvokeFunction
+  #     FunctionName: !Sub "arn:aws:lambda:us-east-1:809585437602:function:${LambdaAuthzFunctionName}"
+  #     Principal: "apigateway.amazonaws.com"
+  #     SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PprmrApiGateway}/authorizers/${ApiPresignedAuthorizer}" 
 
 
   #/{bucket} Resource
@@ -1087,9 +1087,9 @@ Resources:
     Type: AWS::ApiGateway::Method
     Properties:
       ApiKeyRequired: false
-      # AuthorizationType: NONE
-      AuthorizationType: "Custom"
-      AuthorizerId: !Ref ApiBucketAuthorizer
+      AuthorizationType: NONE
+      # AuthorizationType: "Custom"
+      # AuthorizerId: !Ref ApiBucketAuthorizer
       HttpMethod: GET
       Integration:
         ConnectionType: INTERNET
@@ -1163,90 +1163,15 @@ Resources:
       ResourceId: !Ref PprmrApiGatewayBucketResource
       RestApiId: !Ref PprmrApiGateway
 
-  # #Get Presigned URL
-  # ApiGatewayGetPresignedUrlMethod:
-  #   Type: AWS::ApiGateway::Method
-  #   Properties:
-  #     ApiKeyRequired: false
-  #     # AuthorizationType: NONE
-  #     AuthorizationType: "Custom"
-  #     AuthorizerId: !Ref ApiPresignedAuthorizer
-  #     HttpMethod: GET
-  #     Integration:
-  #       ConnectionType: INTERNET
-  #       #Credentials: !GetAtt PprmrApiGatewayRole.Arn
-  #       IntegrationHttpMethod: POST
-  #       PassthroughBehavior: WHEN_NO_MATCH
-  #       Type: AWS_PROXY
-  #       RequestTemplates: { "application/json": "" }
-  #       Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PprmrPresgnUrlFunction.Arn}/invocations"
-  #       IntegrationResponses:
-  #         - ResponseTemplates:
-  #             application/json: ""
-  #           StatusCode: 200
-  #     MethodResponses:
-  #       - StatusCode: 200
-  #         ResponseModels: { "application/json": "Empty" }
-  #         ResponseParameters:
-  #           { "method.response.header.Access-Control-Allow-Origin": false }
-  #       - StatusCode: 400
-  #         ResponseParameters:
-  #           { "method.response.header.Access-Control-Allow-Origin": false }
-  #       - StatusCode: 500
-  #         ResponseParameters:
-  #           { "method.response.header.Access-Control-Allow-Origin": false }
-  #     RequestParameters:
-  #       method.request.path.bucket: false
-  #       method.request.path.key: false
-  #       method.request.querystring.method: false
-  #     ResourceId: !Ref PprmrApiGatewayPresignedBucketKeyResource
-  #     RestApiId: !Ref PprmrApiGateway
-
-  # #Option Method Presigned URL
-  # ApiGatewayGetPresignedUrlMethodOptions:
-  #   Type: AWS::ApiGateway::Method
-  #   Properties:
-  #     ApiKeyRequired: false
-  #     AuthorizationType: NONE
-  #     HttpMethod: OPTIONS
-  #     Integration:
-  #       ConnectionType: INTERNET
-  #       IntegrationHttpMethod: OPTIONS
-  #       PassthroughBehavior: WHEN_NO_MATCH
-  #       Type: MOCK
-  #       RequestTemplates: { "application/json": "" }
-  #       IntegrationResponses:
-  #         - StatusCode: 200
-  #           ResponseParameters:
-  #             {
-  #               "method.response.header.Access-Control-Allow-Origin": "'*'",
-  #               "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-  #               "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'",
-  #             }
-  #     MethodResponses:
-  #       - StatusCode: 200
-  #         ResponseModels: { "application/json": "Empty" }
-  #         ResponseParameters:
-  #           {
-  #             "method.response.header.Access-Control-Allow-Origin": false,
-  #             "method.response.header.Access-Control-Allow-Headers": false,
-  #             "method.response.header.Access-Control-Allow-Methods": false,
-  #           }
-  #     RequestParameters:
-  #       method.request.path.bucket: false
-  #       method.request.path.key: false
-  #     ResourceId: !Ref PprmrApiGatewayPresignedBucketKeyResource
-  #     RestApiId: !Ref PprmrApiGateway
-
   ####New presigned URL
   #Get Presigned URL
   ApiGatewayGetBucketPresignedUrlMethod:
     Type: AWS::ApiGateway::Method
     Properties:
       ApiKeyRequired: false
-      # AuthorizationType: NONE
-      AuthorizationType: "Custom"
-      AuthorizerId: !Ref ApiPresignedAuthorizer
+      AuthorizationType: NONE
+      # AuthorizationType: "Custom"
+      # AuthorizerId: !Ref ApiPresignedAuthorizer
       HttpMethod: GET
       Integration:
         ConnectionType: INTERNET
@@ -1477,7 +1402,7 @@ Resources:
         DefaultTTL: 86400
         MaxTTL: 31536000
         MinTTL: 1
-        Name: LambdaAtEdgeCachePolicy
+        Name: LambdaAtEdgeTempCachePolicy
         ParametersInCacheKeyAndForwardedToOrigin:
           CookiesConfig:
             CookieBehavior: "none"
@@ -1521,125 +1446,125 @@ Resources:
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
 
-  ################## LAMBDA@EDGE ##################
-  LambdaEdgeFunctionRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName: !Ref LambdaAtEdgeRoleName 
-      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
-      Path: "/"
-      ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-      Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                Resource: !Sub "arn:aws:s3:::${LambdaAtEdgeCodeBucket}/*"
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: arn:aws:logs:*:*:*
-              - Effect: Allow
-                Action:
-                  - secretsmanager:GetSecretValue
-                Resource: arn:aws:secretsmanager:*:*:*  
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          -
-            Sid: "AllowLambdaServiceToAssumeRole"
-            Effect: "Allow"
-            Action:
-              - "sts:AssumeRole"
-            Principal:
-              Service:
-                - "lambda.amazonaws.com"
-                - "edgelambda.amazonaws.com"
+  # ################## LAMBDA@EDGE ##################
+  # LambdaEdgeFunctionRole:
+  #   Type: "AWS::IAM::Role"
+  #   Properties:
+  #     RoleName: !Ref LambdaAtEdgeRoleName 
+  #     PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+  #     Path: "/"
+  #     ManagedPolicyArns:
+  #       - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  #     Policies:
+  #       - PolicyName: root
+  #         PolicyDocument:
+  #           Version: '2012-10-17'
+  #           Statement:
+  #             - Effect: Allow
+  #               Action:
+  #                 - s3:GetObject
+  #               Resource: !Sub "arn:aws:s3:::${LambdaAtEdgeCodeBucket}/*"
+  #             - Effect: Allow
+  #               Action:
+  #                 - logs:CreateLogGroup
+  #                 - logs:CreateLogStream
+  #                 - logs:PutLogEvents
+  #               Resource: arn:aws:logs:*:*:*
+  #             - Effect: Allow
+  #               Action:
+  #                 - secretsmanager:GetSecretValue
+  #               Resource: arn:aws:secretsmanager:*:*:*  
+  #     AssumeRolePolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         -
+  #           Sid: "AllowLambdaServiceToAssumeRole"
+  #           Effect: "Allow"
+  #           Action:
+  #             - "sts:AssumeRole"
+  #           Principal:
+  #             Service:
+  #               - "lambda.amazonaws.com"
+  #               - "edgelambda.amazonaws.com"
 
-  ViewerRequestLambdaAtEdgeFunction:
-    DependsOn:
-      - LambdaEdgeFunctionRole
-      - LambdaAtEdgeSecret
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: !Ref LambdaAtEdgeFunctionName
-      Description: Lambda@Edge triggered by viewer request in Cloudfront distribution
-      Handler: src/viewer_request.handler
-      Runtime: nodejs12.x
-      Role: !GetAtt LambdaEdgeFunctionRole.Arn
-      Timeout: 5
-      Code:
-        S3Bucket: !Ref LambdaAtEdgeCodeBucket
-        S3Key: !Ref LambdaAtEdgeCodeArtifact
-      Tags:
-        - Key: costCenter
-          Value: !Ref CostCenter
-        - Key: uniqueID
-          Value: !Ref UniqueID
-        - Key: dataClassification
-          Value: !Ref DataClassification
-        - Key: supportGroup
-          Value: !Ref SupportGroup
-        - Key: changeGroup
-          Value: !Ref ChangeGroup
-        - Key: blockcode
-          Value: !Ref Blockcode
-        - Key: drTier
-          Value: !Ref DrTier
-        - Key: pciIndicator
-          Value: !Ref PciIndicator
-        - Key: phiIndicator
-          Value: !Ref PhiIndicator
-        - Key: soxIndicator
-          Value: !Ref SoxIndicator
-        - Key: cuiIndicator
-          Value: !Ref CuiIndicator
+  # ViewerRequestLambdaAtEdgeFunction:
+  #   DependsOn:
+  #     - LambdaEdgeFunctionRole
+  #     - LambdaAtEdgeSecret
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     FunctionName: !Ref LambdaAtEdgeFunctionName
+  #     Description: Lambda@Edge triggered by viewer request in Cloudfront distribution
+  #     Handler: src/viewer_request.handler
+  #     Runtime: nodejs12.x
+  #     Role: !GetAtt LambdaEdgeFunctionRole.Arn
+  #     Timeout: 5
+  #     Code:
+  #       S3Bucket: !Ref LambdaAtEdgeCodeBucket
+  #       S3Key: !Ref LambdaAtEdgeCodeArtifact
+  #     Tags:
+  #       - Key: costCenter
+  #         Value: !Ref CostCenter
+  #       - Key: uniqueID
+  #         Value: !Ref UniqueID
+  #       - Key: dataClassification
+  #         Value: !Ref DataClassification
+  #       - Key: supportGroup
+  #         Value: !Ref SupportGroup
+  #       - Key: changeGroup
+  #         Value: !Ref ChangeGroup
+  #       - Key: blockcode
+  #         Value: !Ref Blockcode
+  #       - Key: drTier
+  #         Value: !Ref DrTier
+  #       - Key: pciIndicator
+  #         Value: !Ref PciIndicator
+  #       - Key: phiIndicator
+  #         Value: !Ref PhiIndicator
+  #       - Key: soxIndicator
+  #         Value: !Ref SoxIndicator
+  #       - Key: cuiIndicator
+  #         Value: !Ref CuiIndicator
 
-  ViewerRequestLambdaFunctionVersion:
-    Type: AWS::Lambda::Version
-    Properties:
-      FunctionName: !Ref ViewerRequestLambdaAtEdgeFunction
-      Description: Newly deployed version
+  # ViewerRequestLambdaFunctionVersion:
+  #   Type: AWS::Lambda::Version
+  #   Properties:
+  #     FunctionName: !Ref ViewerRequestLambdaAtEdgeFunction
+  #     Description: Newly deployed version
         
-  LambdaAtEdgeSecret: 
-    Type: "AWS::SecretsManager::Secret"
-    Properties: 
-      Name: !Ref SecretName
-      Description: "This secret is used by the request viewer lambda@edge function"
-      SecretString: !Sub |-
-        {
-          "PUBLIC_KEY": "${PublicKey}",
-          "PRIVATE_KEY": "${PrivateKey}"
-        }
-      Tags:
-        - Key: costCenter
-          Value: !Ref CostCenter
-        - Key: uniqueID
-          Value: !Ref UniqueID
-        - Key: dataClassification
-          Value: !Ref DataClassification
-        - Key: supportGroup
-          Value: !Ref SupportGroup
-        - Key: changeGroup
-          Value: !Ref ChangeGroup
-        - Key: blockcode
-          Value: !Ref Blockcode
-        - Key: drTier
-          Value: !Ref DrTier
-        - Key: pciIndicator
-          Value: !Ref PciIndicator
-        - Key: phiIndicator
-          Value: !Ref PhiIndicator
-        - Key: soxIndicator
-          Value: !Ref SoxIndicator
-        - Key: cuiIndicator
-          Value: !Ref CuiIndicator
+  # LambdaAtEdgeSecret: 
+  #   Type: "AWS::SecretsManager::Secret"
+  #   Properties: 
+  #     Name: !Ref SecretName
+  #     Description: "This secret is used by the request viewer lambda@edge function"
+  #     SecretString: !Sub |-
+  #       {
+  #         "PUBLIC_KEY": "${PublicKey}",
+  #         "PRIVATE_KEY": "${PrivateKey}"
+  #       }
+  #     Tags:
+  #       - Key: costCenter
+  #         Value: !Ref CostCenter
+  #       - Key: uniqueID
+  #         Value: !Ref UniqueID
+  #       - Key: dataClassification
+  #         Value: !Ref DataClassification
+  #       - Key: supportGroup
+  #         Value: !Ref SupportGroup
+  #       - Key: changeGroup
+  #         Value: !Ref ChangeGroup
+  #       - Key: blockcode
+  #         Value: !Ref Blockcode
+  #       - Key: drTier
+  #         Value: !Ref DrTier
+  #       - Key: pciIndicator
+  #         Value: !Ref PciIndicator
+  #       - Key: phiIndicator
+  #         Value: !Ref PhiIndicator
+  #       - Key: soxIndicator
+  #         Value: !Ref SoxIndicator
+  #       - Key: cuiIndicator
+  #         Value: !Ref CuiIndicator
 
   CFDistribution:
     Type: AWS::CloudFront::Distribution
@@ -1647,7 +1572,7 @@ Resources:
       - DomainCertificate
       - CloudFrontResponseHeadersPolicy
       # - LambdaAtEdgePermission
-      - ViewerRequestLambdaFunctionVersion
+      # - ViewerRequestLambdaFunctionVersion
     Properties:
       DistributionConfig:
         WebACLId: !GetAtt AppWebACL.Arn
@@ -1682,13 +1607,12 @@ Resources:
             ResponseCode: 404
         DefaultCacheBehavior:
           TargetOriginId: myS3Origin
-          LambdaFunctionAssociations:
-            -
-              EventType: viewer-request
-              #LambdaFunctionARN: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaAtEdgeFunctionName}:1
-              LambdaFunctionARN: !Ref ViewerRequestLambdaFunctionVersion
+          # LambdaFunctionAssociations:
+          #   -
+          #     EventType: viewer-request
+          #     #LambdaFunctionARN: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaAtEdgeFunctionName}:1
+          #     LambdaFunctionARN: !Ref ViewerRequestLambdaFunctionVersion
           CachePolicyId: !Ref CloudFrontCachePolicy
-          # OriginRequestPolicyId: !Ref CloudFrontOriginRequestPolicy
           ViewerProtocolPolicy: "redirect-to-https"
           ResponseHeadersPolicyId: !Ref CloudFrontResponseHeadersPolicy
           AllowedMethods:
@@ -1831,35 +1755,6 @@ Resources:
           Value: !Ref SoxIndicator
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
-
-
-
-  # SPAWebACL: 
-  #   Type: "AWS::WAF::WebACL"
-  #   Properties: 
-  #     Name: !Ref SPAWebACLName
-  #     DefaultAction: 
-  #       Type: "ALLOW"
-  #     MetricName: !Ref SPAWebACLName
-      # Rules: 
-      #   - 
-      #     Action: 
-      #       Type: "BLOCK"
-      #     Priority: 1
-      #     RuleId: 
-      #       Ref: "MyRule"
-      #   - 
-      #     Action: 
-      #       Type: "BLOCK"
-      #     Priority: 2
-      #     RuleId: 
-      #       Ref: "BadReferersRule"
-      #   - 
-      #     Action: 
-      #       Type: "BLOCK"
-      #     Priority: 3
-      #     RuleId: 
-      #       Ref: "SqlInjRule"
 
 Outputs:
   UploadedFilesS3Bucket:

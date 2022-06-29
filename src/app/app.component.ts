@@ -24,42 +24,42 @@ export class AppComponent {
 
   constructor(private oauthService: OAuthService, private headerService: HeaderService, private _loaderSvc: LoaderService, 
     private authService: AuthService, private router: Router) {
-    this._loaderSvc.show();
-    // if(environment.appDeploymentLevel != 'LCL'){
-      //Automatically load user profile via OIDC
-      console.log('App component....');
-      this.oauthService.events
-        .pipe(filter((e) => e.type === 'token_received'))
-        .subscribe((_) => {
-          console.log('access token', this.oauthService.getAccessToken());
-          this.oauthService.loadUserProfile().then((userProfile)=>{
-            console.log(userProfile);
-            const userProfileObj = userProfile as UserProfile;
-            localStorage.setItem('userProfile',JSON.stringify(userProfile));
-            localStorage.setItem('username', userProfileObj.info.name);
-            headerService.assignUserNameField(userProfileObj.info.name);
-            //Validate SSGM Group
-            this.checkUserGroup();
+    // this._loaderSvc.show();
+    // // if(environment.appDeploymentLevel != 'LCL'){
+    //   //Automatically load user profile via OIDC
+    //   console.log('App component....');
+    //   this.oauthService.events
+    //     .pipe(filter((e) => e.type === 'token_received'))
+    //     .subscribe((_) => {
+    //       console.log('access token', this.oauthService.getAccessToken());
+    //       this.oauthService.loadUserProfile().then((userProfile)=>{
+    //         console.log(userProfile);
+    //         const userProfileObj = userProfile as UserProfile;
+    //         localStorage.setItem('userProfile',JSON.stringify(userProfile));
+    //         localStorage.setItem('username', userProfileObj.info.name);
+    //         headerService.assignUserNameField(userProfileObj.info.name);
+    //         //Validate SSGM Group
+    //         this.checkUserGroup();
 
-          });
+    //       });
           
-        });
-      if (!sessionStorage.getItem('access_token')) {
-        console.log('Here 2---');
-        //sessionStorage.clear();
-        this.configureCodeFlow();
+    //     });
+    //   if (!sessionStorage.getItem('access_token')) {
+    //     console.log('Here 2---');
+    //     //sessionStorage.clear();
+    //     this.configureCodeFlow();
         
-      } else {
-        this.access_token = sessionStorage.getItem('access_token');
-        this._loaderSvc.hide();
-          // localStorage.setItem('userProfile',JSON.stringify(userProfileUpdate));
-        //sessionStorage.removeItem("access_token");
-      }
-    // }else{
-    //   console.log('Environment: LCL');
-    //   this._loaderSvc.hide();
-    // }
-    this.displayUsername();
+    //   } else {
+    //     this.access_token = sessionStorage.getItem('access_token');
+    //     this._loaderSvc.hide();
+    //       // localStorage.setItem('userProfile',JSON.stringify(userProfileUpdate));
+    //     //sessionStorage.removeItem("access_token");
+    //   }
+    // // }else{
+    // //   console.log('Environment: LCL');
+    // //   this._loaderSvc.hide();
+    // // }
+    // this.displayUsername();
    
   }
 

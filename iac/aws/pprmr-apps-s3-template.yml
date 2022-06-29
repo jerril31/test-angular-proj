@@ -150,7 +150,7 @@ Parameters:
 
   PprmrLambdaCodeBucket:
     Type: String
-    Default: "techops-eng-dev-pprmr-lambdacode-s3"
+    Default: "techops-eng-dev-pprmr-lambdacode-temp-s3"
     Description: "S3 bucket that contains lambda function java project"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
@@ -159,24 +159,24 @@ Parameters:
   #SPA
   SPABucketName:
     Type: String
-    Default: "techops-eng-dev-pprmr-spa-s3"
+    Default: "techops-eng-dev-pprmr-spa-temp-s3"
     Description: "S3 bucket to host PDF Password Remover SPA"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
   S3LogsBucketName:
     Type: String
-    Default: "techops-eng-dev-pprmr-logs-s3"
+    Default: "techops-eng-dev-pprmr-logs-temp-s3"
     Description: "S3 bucket to host S3 logs"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
     ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
-  LambdAtEdgeCodeBucketName:
-    Type: String
-    Default: "techops-eng-dev-pprmr-lambda-edge-s3"
-    Description: "S3 bucket that contains lambda function java project"
-    AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
-    ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
+  # LambdAtEdgeCodeBucketName:
+  #   Type: String
+  #   Default: "techops-eng-dev-pprmr-lambda-edge-s3"
+  #   Description: "S3 bucket that contains lambda function java project"
+  #   AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]s3$
+  #   ConstraintDescription: Bucket names must be lowercase, start and end with a letter or number, and be between 3 and 63 characters in length.
 
 
   EmailRecipient:
@@ -186,7 +186,7 @@ Parameters:
 
   TopicName:
     Type: String
-    Default: "techops-eng-dev-pprmr-s3-topic"
+    Default: "techops-eng-dev-pprmr-s3-temp-topic"
     Description: "S3 Bucket Event Notif Topic"
     AllowedPattern: ^techops-eng[-](dev|si|prd)[-](.*?)[-]topic$
 
@@ -484,51 +484,51 @@ Resources:
         - Key: cuiIndicator
           Value: !Ref CuiIndicator
 
-  #S3 Bucket for Lambda At Edge Function
-  LambdaAtEdgeCodeS3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref LambdAtEdgeCodeBucketName
-      LoggingConfiguration:
-        DestinationBucketName: !Ref S3LogsBucket
-        LogFilePrefix: pprmr-s3-logs/lambdaatedge-code-bucket-logs/
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls : true
-        BlockPublicPolicy : true
-        IgnorePublicAcls : true
-        RestrictPublicBuckets : true
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: 'aws:kms'
-      NotificationConfiguration:
-        TopicConfigurations:
-          - Topic: !Ref Topic
-            Event: s3:ObjectRemoved:*
+  # #S3 Bucket for Lambda At Edge Function
+  # LambdaAtEdgeCodeS3Bucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Ref LambdAtEdgeCodeBucketName
+  #     LoggingConfiguration:
+  #       DestinationBucketName: !Ref S3LogsBucket
+  #       LogFilePrefix: pprmr-s3-logs/lambdaatedge-code-bucket-logs/
+  #     PublicAccessBlockConfiguration:
+  #       BlockPublicAcls : true
+  #       BlockPublicPolicy : true
+  #       IgnorePublicAcls : true
+  #       RestrictPublicBuckets : true
+  #     BucketEncryption:
+  #       ServerSideEncryptionConfiguration:
+  #         - ServerSideEncryptionByDefault:
+  #             SSEAlgorithm: 'aws:kms'
+  #     NotificationConfiguration:
+  #       TopicConfigurations:
+  #         - Topic: !Ref Topic
+  #           Event: s3:ObjectRemoved:*
 
-      Tags:
-        - Key: costCenter
-          Value: !Ref CostCenter
-        - Key: uniqueID
-          Value: !Ref UniqueID
-        - Key: dataClassification
-          Value: !Ref DataClassification
-        - Key: supportGroup
-          Value: !Ref SupportGroup
-        - Key: changeGroup
-          Value: !Ref ChangeGroup
-        - Key: blockcode
-          Value: !Ref Blockcode
-        - Key: drTier
-          Value: !Ref DrTier
-        - Key: pciIndicator
-          Value: !Ref PciIndicator
-        - Key: phiIndicator
-          Value: !Ref PhiIndicator
-        - Key: soxIndicator
-          Value: !Ref SoxIndicator
-        - Key: cuiIndicator
-          Value: !Ref CuiIndicator
+  #     Tags:
+  #       - Key: costCenter
+  #         Value: !Ref CostCenter
+  #       - Key: uniqueID
+  #         Value: !Ref UniqueID
+  #       - Key: dataClassification
+  #         Value: !Ref DataClassification
+  #       - Key: supportGroup
+  #         Value: !Ref SupportGroup
+  #       - Key: changeGroup
+  #         Value: !Ref ChangeGroup
+  #       - Key: blockcode
+  #         Value: !Ref Blockcode
+  #       - Key: drTier
+  #         Value: !Ref DrTier
+  #       - Key: pciIndicator
+  #         Value: !Ref PciIndicator
+  #       - Key: phiIndicator
+  #         Value: !Ref PhiIndicator
+  #       - Key: soxIndicator
+  #         Value: !Ref SoxIndicator
+  #       - Key: cuiIndicator
+  #         Value: !Ref CuiIndicator
 
 Outputs:
   LambdaS3Bucket:

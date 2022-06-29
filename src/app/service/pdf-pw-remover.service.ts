@@ -30,18 +30,18 @@ export class PdfPwRemoverService {
     );
   }
 
-  retrieveAccessToken(){
-    //const accessToken = sessionStorage.getItem(AppConstant.ACCESS_TOKEN_KEY);
-    console.log("Getting access token..")
-    const accessToken = this.oauthService.getAccessToken();
-    if(accessToken){
-      return "Bearer " + accessToken;
-    }else{
-      console.log("No access token found.");
-      return "";
-    }
+  // retrieveAccessToken(){
+  //   //const accessToken = sessionStorage.getItem(AppConstant.ACCESS_TOKEN_KEY);
+  //   console.log("Getting access token..")
+  //   const accessToken = this.oauthService.getAccessToken();
+  //   if(accessToken){
+  //     return "Bearer " + accessToken;
+  //   }else{
+  //     console.log("No access token found.");
+  //     return "";
+  //   }
 
-  }
+  // }
 
   extractBucketContents(xmlResponseString: String) {
     //console.log(xmlResponseString);
@@ -91,8 +91,8 @@ export class PdfPwRemoverService {
   }
 
   retrieveConvertedFiles(): Observable<any> {
-    const headers = new HttpHeaders().set(AppConstant.AUTH_HEADER, this.retrieveAccessToken());
-   //const headers = new HttpHeaders();
+  //const headers = new HttpHeaders().set(AppConstant.AUTH_HEADER, this.retrieveAccessToken());
+   const headers = new HttpHeaders();
     return this.http.get(
       `${environment.awsApiGwS3BaseUrl}${environment.convertedFilesBucket}`,
       { responseType: 'text', headers: headers }
@@ -106,8 +106,8 @@ export class PdfPwRemoverService {
    * @returns
    */
   uploadFileViaPresignedUrl(file: File): Observable<any> {
-    const headersGetPresigned = new HttpHeaders().set(AppConstant.AUTH_HEADER, this.retrieveAccessToken());
-    //const headersGetPresigned = new HttpHeaders();
+    //const headersGetPresigned = new HttpHeaders().set(AppConstant.AUTH_HEADER, this.retrieveAccessToken());
+    const headersGetPresigned = new HttpHeaders();
     let encodedFilename = encodeURIComponent(file.name);
     console.log('Uploading via presignedURL..');
     console.log(`${encodedFilename}`);
@@ -173,8 +173,8 @@ export class PdfPwRemoverService {
     location: string,
     fileName: string
   ): Observable<any> {
-    const headersGetPresigned = new HttpHeaders().set(AppConstant.AUTH_HEADER, this.retrieveAccessToken());
-    //const headersPresigned = new HttpHeaders();
+    //const headersGetPresigned = new HttpHeaders().set(AppConstant.AUTH_HEADER, this.retrieveAccessToken());
+    const headersGetPresigned = new HttpHeaders();
     // const requestOptions: Object = {
     //   headers: headers,
     // };
@@ -184,8 +184,6 @@ export class PdfPwRemoverService {
 
     return this.http
       .get(
-        // `${environment.awsApiGwS3BaseUrl}s3/${environment.convertedFilesBucket}/${encodedFilename}`,
-        // { params: new HttpParams().set('method', 'GET') , headers: headersGetPresigned}
         `${environment.awsApiGwS3BaseUrl}s3/${environment.convertedFilesBucket}`,
         { params: new HttpParams().set('method', 'GET').set('key', encodedFilename) , headers: headersGetPresigned}
       )
@@ -206,49 +204,6 @@ export class PdfPwRemoverService {
           );
       })
     );
-
-  //         let fileDirectory = fileName.toString().split("/");
-  //         let encodedFilenameOnly = encodeURIComponent(fileDirectory[1]);
-  //         var url = `https://${environment.convertedFilesBucket}.s3.amazonaws.com/${fileDirectory[0]}/${encodedFilenameOnly}`;
-
-  //         var params = new HttpParams();
-  //         let presignedUrlResponse = res.presignedUrl;
-  //         console.log("Presigned URL Response: " + presignedUrlResponse);
-  //         let paramString = presignedUrlResponse.substring(presignedUrlResponse.indexOf('?')+1);
-  //         console.log("Concat String: ");
-  //         console.log(paramString);
-  //         paramString.split('&').forEach(function (element:any) {
-  //           console.log(element);
-  //           let paramStringItem = element.split('=');
-  //           console.log(paramStringItem);
-  //           let decodedValue = decodeURIComponent(paramStringItem[1]);
-  //           console.log("Decoded: " + decodedValue);
-  //           params = params.append(paramStringItem[0], decodedValue);
-  //         });
-  //         console.log("PARAMS: "+ params);
-  //        // url = url + "?" +  paramString;
-  //         console.log(params);
-  //         return this.retrieveFile(headers,params,url);
-         
-  //       })
-  //     );
-  // }
-
-  // private retrieveFile(
-  //   headers: HttpHeaders, httpParams: HttpParams,
-  //   url: string
-  // ): Observable<any> {
-  //   return this.http
-  //           .get(url, {
-  //             headers: headers, params: httpParams,
-  //             responseType: 'blob'
-  //           })
-  //           .pipe(
-  //             map((res) => {
-  //               console.log(res);
-  //               return new Blob([res], { type: 'application/pdf' });
-  //             })
-  //           );
 
   }
 }
