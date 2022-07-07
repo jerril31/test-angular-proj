@@ -368,6 +368,7 @@ label {
   line-height: 1.35rem;
   float: left;
   padding-right: 1.5rem;
+  font-size:1.4rem;
 }
 .header_welcome-area_user-info_action-item {
   float: left;
@@ -400,7 +401,7 @@ label {
 }
 .header_welcome-area_user-info__user-name {
   padding-right: 0.8rem;
-  margin-right: 0.8rem;
+  margin-right: 9rem;
   //border-right: #b7dbff 1px solid;//Removing since no other neighbor elements
   float: left;
   font-size: 1.2rem;
@@ -484,6 +485,18 @@ label {
     padding: 1rem 2rem 0;
   }
 }
+
+.header_app_info-area{
+  width: 80%;
+  position:relative;
+  display: block;
+}
+
+.header_user_info-area{
+  width: 80%;
+  position:relative;
+  display: block;
+}
 @media (min-width: 992px) {
   .header__header-option {
     margin-top: 0.5rem;
@@ -510,7 +523,7 @@ label {
     font-size: 2.6rem;
     float: left;
     margin-top: 0;
-    width: 40%;
+    width: 0%;
   }
   .header_welcome-area_application-info_aircraft-info {
     float: left;
@@ -538,7 +551,7 @@ label {
   }
   .header_welcome-area_application-heading__h1,
   .header_welcome-area_user-info {
-    min-width: 29.7rem;
+    min-width: 50.5rem;
   }
 }
 @media (max-width: 991px) {
