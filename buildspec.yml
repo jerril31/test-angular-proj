@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: latest
+      nodejs: 12.14
     commands:
       - echo Installing packages...
       - export PUPPETEER_DOWNLOAD_HOST=https://npm.taobao.org/mirrors
