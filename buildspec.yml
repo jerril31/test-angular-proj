@@ -13,7 +13,7 @@ phases:
       - echo Build started on `date`
       #- npm run lint
       #- npm run test:ci
-      - npm run build:$ENV
+      - npm run build$ENV
       - pwd
       - ls -l
       - aws s3 sync ./dist/ s3://$CODE_ARTIFACT_BUCKET --delete
