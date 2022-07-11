@@ -1,0 +1,388 @@
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CF configurations for PDF Permission Remover S3 App Buckets.
+
+Metadata:
+  "AWS::CloudFormation::Interface":
+    ParameterGroups:
+      - Label:
+          default: Required Tags
+        Parameters:
+          - Blockcode
+          - CostCenter
+          - UniqueID
+          - DataClassification
+          - SupportGroup
+          - ChangeGroup
+          - DrTier
+          - PciIndicator
+          - PhiIndicator
+          - SoxIndicator
+          - CuiIndicator
+      - Label:
+          default: Git Info
+        Parameters:
+          - GitHubOwner
+          - GitHubRepo
+          - GitHubBranch
+          - GitHubOAuthToken
+
+      - Label:
+          default:IAM Roles and Policies
+        Parameters:
+          - CodeBuildServicePolicyName
+          - CodeBuildServiceRoleName
+          - PipelineServicePolicyName
+          - PipelineRoleName
+          - ProjectName
+      - Label:
+          default: S3 Configurations
+        Parameters:
+          - ArtifactStoreBucketName
+          - SiteBucketName
+          - ArtifactName
+
+
+Parameters:
+
+  GitHubOAuthToken:
+    Type: String
+    Default: "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"
+  GitHubOwner:
+    Type: String
+    Default: "jerril31"
+  GitHubRepo:
+    Type: String
+    Default: "test-angular-proj"
+  GitHubBranch:
+    Type: String
+    Default: "main"
+  
+  CodeBuildServicePolicyName:
+    Description: The policy name for the code build service, must start with 'delegate-admin'
+    Type: String
+    Default: delegate-admin-techops-eng-dev-pprmr-test-CodeBuild-policy
+  
+  CodeBuildServiceRoleName:
+    Description: The role name for the code build service, must start with 'delegate-admin'
+    Type: String
+    Default: delegate-admin-techops-eng-dev-pprmr-test-codebuild-role
+
+  PipelineServicePolicyName:
+    Description: The policy name for the pipeline service, must start with 'delegate-admin'
+    Type: String
+    Default: delegate-admin-techops-eng-dev-pprmr-test-CodePipeline-policy
+
+  PipelineRoleName:
+    Description: Name for the PipelineRole, must start with 'delegate-admin'
+    Type: String
+    Default: delegate-admin-techops-eng-dev-pprmr-test-codepipeline-role
+
+  ArtifactStoreBucketName:
+    Description: S3 bucket name for SPA UI code for 3rd party git integration
+    Type: String
+    Default: techops-eng-dev-pprmr-test-artifact-bucket
+
+  ProjectName:
+    Type: String
+    Description: The name of the project for which we are building this CI/CD pipeline
+    Default: techops-eng-dev-pprmr-test-BuildProject
+
+  SiteBucketName:
+    Description: S3 bucket name for SPA UI hosting
+    Type: String
+    Default: techops-eng-dev-pprmr-test-spa-bucket
+
+  ArtifactName:
+    Description: Name of artifact
+    Type: String
+    Default: hello-world-gradle.jar
+  
+Resources:
+
+  # SiteBucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Ref SiteBucketName
+
+  # ArtifactStoreBucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Ref ArtifactStoreBucketName
+      
+  PipelineRole:
+    DependsOn: 
+      - SiteBucket
+      - ArtifactStoreBucket
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Ref PipelineRoleName
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+      Path: "/"
+      # ManagedPolicyArns:
+      #   - !Ref LambdaAccessPolicy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - #Sid: "AllowLambdaServiceToAssumeRole"
+            Effect: "Allow"
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "codepipeline.amazonaws.com"
+
+  CodeBuildServiceRole:
+    DependsOn: 
+      - SiteBucket
+      - ArtifactStoreBucket
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Ref CodeBuildServiceRoleName
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - #Sid: "AllowLambdaServiceToAssumeRole"
+            Effect: "Allow"
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "codebuild.amazonaws.com"
+
+##Pil
+  CodePipelinePolicy:
+    DependsOn: PipelineRole
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Ref PipelineServicePolicyName
+      Roles:
+        - !Ref PipelineRoleName
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Action:
+          - s3:GetObject
+          - s3:ListBucket
+          - s3:GetObjectVersion
+          - s3:GetBucketVersioning
+          - s3:PutObject          
+          Effect: Allow
+          Resource:
+          - Fn::Sub: arn:aws:s3:::${ArtifactStoreBucketName}
+          - Fn::Sub: arn:aws:s3:::${ArtifactStoreBucketName}/*
+          - Fn::Sub: arn:aws:s3:::${SiteBucketName}
+          - Fn::Sub: arn:aws:s3:::${SiteBucketName}/*          
+        - Action:
+          - codebuild:StartBuild
+          - codebuild:BatchGetBuilds
+          Effect: Allow
+          Resource:
+          - !Sub 'arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${ProjectName}*'  
+  CodeBuildPolicy:
+    DependsOn: CodeBuildServiceRole
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Ref CodeBuildServicePolicyName
+      Roles:
+        - !Ref CodeBuildServiceRoleName
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Action:
+          - s3:GetObject
+          - s3:ListBucket
+          - s3:GetObjectVersion
+          - s3:GetBucketVersioning
+          - s3:PutObject
+          - s3:DeleteObject
+          - s3:GetBucketLocation
+          Effect: Allow
+          Resource:
+          - Fn::Sub: arn:aws:s3:::${ArtifactStoreBucketName}
+          - Fn::Sub: arn:aws:s3:::${ArtifactStoreBucketName}/*
+          - Fn::Sub: arn:aws:s3:::${SiteBucketName}
+          - Fn::Sub: arn:aws:s3:::${SiteBucketName}/*                                                                     
+        - Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Effect: Allow
+          Resource:
+          - '*'
+
+  CodePipeline:
+    DependsOn: PipelineRole
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactStoreBucketName
+        # EncryptionKey:
+        #   Id: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/gitlab-codepipeline-cmk"
+        #   Type: KMS    
+      Name: techops-eng-dev-pprmr-test-CodePipelineName
+      RestartExecutionOnUpdate: true
+      RoleArn: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${PipelineRoleName}'      
+      Stages:
+      - Name: Source
+        Actions:
+        - Name: CloneRepository
+          ActionTypeId:
+            Category: Source
+            Owner: ThirdParty
+            Provider: GitHub
+            Version: 1
+          Configuration:
+            Owner: !Ref GitHubOwner
+            Repo: !Ref GitHubRepo
+            Branch: !Ref GitHubBranch
+            PollForSourceChanges: false
+            OAuthToken: !Ref GitHubOAuthToken
+          OutputArtifacts:
+            - Name: SourceOutput
+          RunOrder: 1
+      - Name: Build
+        Actions:
+        - Name: CodeBuild
+          InputArtifacts:
+          - Name: SourceOutput
+          ActionTypeId:
+            Category: Build
+            Owner: AWS
+            Version: '1'
+            Provider: CodeBuild
+          OutputArtifacts:
+          - Name: BuildOutput
+          Configuration:
+            ProjectName: !Ref BuildProject
+            EnvironmentVariables: !Sub '[{"name":"CODE_ARTIFACT_BUCKET","value":"${SiteBucketName}","type":"PLAINTEXT"},{"name":"CODE_ARTIFACT_NAME","value":"${ArtifactName}","type":"PLAINTEXT"} ]'
+          RunOrder: 1
+      # - Name: Prod
+      #   Actions:
+      #   - Name: Deploy
+      #     InputArtifacts:
+      #     - Name: BuildOutput
+      #     ActionTypeId:
+      #       Category: Build
+      #       Owner: AWS
+      #       Version: '1'
+      #       Provider: CodeBuild
+      #     Configuration:
+      #       ProjectName: !Ref ProdDeployProject
+      #     RunOrder: 1
+
+  # CodeBasePipelineWebhook:
+  #   Type: "AWS::CodePipeline::Webhook"
+  #   Properties:
+  #     TargetPipeline: !Sub ${PrefixLabel}-CodeBasePipelineWebhook
+  #     TargetPipelineVersion: 1
+  #     TargetAction: Source
+  #     Filters:
+  #       - JsonPath: '$.ref'
+  #         MatchEquals: 'refs/heads/{CodeBaseBranch}'
+  #     Authentication: IP
+  #     AuthenticationConfiguration:
+  #       AllowedIPRange: !Ref GitWebHookIpAddress
+  #     RegisterWithThirdParty: false
+
+  GithubWebhook:
+    Type: 'AWS::CodePipeline::Webhook'
+    Properties:
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+        SecretToken: !Ref GitHubOAuthToken
+      RegisterWithThirdParty: true
+      Filters:
+        - JsonPath: "$.ref"
+          MatchEquals: !Sub 'refs/heads/${GitHubBranch}'
+      TargetPipeline: !Ref CodePipeline
+      TargetAction: CloneRepository
+      TargetPipelineVersion: !GetAtt CodePipeline.Version
+  
+  BuildProject:
+    DependsOn: CodeBuildServiceRole
+    Type: AWS::CodeBuild::Project
+    Properties:
+      # VpcConfig:        
+      #   VpcId: !Ref GitPullVpc
+      #   SecurityGroupIds: !Ref SecurityGroup
+      #   Subnets: !Ref GitPullSubnet
+      Name: !Ref ProjectName
+      ServiceRole: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${CodeBuildServiceRoleName}'
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: "LINUX_CONTAINER"
+        ComputeType: "BUILD_GENERAL1_SMALL"
+        Image: "aws/codebuild/standard:3.0"
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec.yml
+      TimeoutInMinutes: 5
+
+  # CloudFormationServiceRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: !Sub delegate-admin-cf-techops-eng-pprmr-role
+  #     AssumeRolePolicyDocument:
+  #       Version: 2012-10-17
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service:
+  #               - cloudformation.amazonaws.com
+  #           Action:
+  #             - sts:AssumeRole
+  #     Path: /
+  #     ManagedPolicyArns:
+  #       - !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-iam-access-policy        
+  #     PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/cft-developer-boundary-policy
+  #     Policies:
+  #       - PolicyName: delegate-admin-techops-eng-pprmr-CloudFormationPolicy-Inline
+  #         PolicyDocument:
+  #           Version: 2012-10-17
+  #           Statement:
+  #             - Effect: Allow
+  #               Action:
+  #                 - s3:GetObject                  
+  #                 - s3:ListBucket
+  #                 - s3:GetObjectVersion
+  #                 - s3:GetBucketVersioning     
+  #                 - s3:CreateBucket    
+  #                 - s3:SetBucketEncryption                 
+  #               Resource:
+  #                 - "*"
+  #             - Effect: Allow
+  #               Action:
+  #                 - s3:PutObject
+  #                 - s3:GetObject
+  #                 - s3:ListBucket
+  #               Resource:
+  #                 - Fn::Sub: arn:aws:s3:::${ArtifactStoreBucketName}/* 
+  #                 - Fn::Sub: arn:aws:s3:::${SiteBucketName}/*
+  #             - Effect: Allow
+  #               Action:
+  #                 - iam:GetRole
+  #                 - iam:CreateRole
+  #                 - iam:DeleteRole
+  #                 - iam:PutRolePolicy
+  #               Resource:
+  #                 - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/*
+  #             - Effect: Allow
+  #               Action:
+  #                 - iam:AttachRolePolicy
+  #                 - iam:DeleteRolePolicy
+  #                 - iam:DetachRolePolicy
+  #               Resource:
+  #                 - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/*
+  #             - Effect: Allow
+  #               Action:
+  #                 - iam:PassRole
+  #               Resource:
+  #                 - "*" 
+  
+
+  

@@ -1,0 +1,83 @@
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CF configurations for PDF Permission Remover S3 App Buckets.
+
+Metadata:
+  "AWS::CloudFormation::Interface":
+    ParameterGroups:
+      - Label:
+          default: Required Tags
+        Parameters:
+          - Blockcode
+          - CostCenter
+          - UniqueID
+          - DataClassification
+          - SupportGroup
+          - ChangeGroup
+          - DrTier
+          - PciIndicator
+          - PhiIndicator
+          - SoxIndicator
+          - CuiIndicator
+      - Label:
+          default: Git Info
+        Parameters:
+          - GitHubOwner
+          - GitHubRepo
+          - GitHubBranch
+          - GitHubOAuthToken
+
+      - Label:
+          default:IAM Roles and Policies
+        Parameters:
+          - CodeBuildServicePolicyName
+          - CodeBuildServiceRoleName
+          - PipelineServicePolicyName
+          - PipelineRoleName
+          - ProjectName
+      - Label:
+          default: S3 Configurations
+        Parameters:
+          - ArtifactStoreBucketName
+          - SiteBucketName
+          - ArtifactName
+
+
+Parameters:
+
+
+  ArtifactStoreBucketName:
+    Description: S3 bucket name for SPA UI code for 3rd party git integration
+    Type: String
+    Default: techops-eng-dev-pprmr-test-artifact-bucket
+
+  ProjectName:
+    Type: String
+    Description: The name of the project for which we are building this CI/CD pipeline
+    Default: techops-eng-dev-pprmr-test-BuildProject
+
+  SiteBucketName:
+    Description: S3 bucket name for SPA UI hosting
+    Type: String
+    Default: techops-eng-dev-pprmr-test-spa-bucket
+
+  ArtifactName:
+    Description: Name of artifact
+    Type: String
+    Default: hello-world-gradle.jar
+  
+Resources:
+
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref SiteBucketName
+
+  ArtifactStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref ArtifactStoreBucketName
+      
+
+
+  
