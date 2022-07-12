@@ -7,11 +7,11 @@ phases:
     commands:
       - echo Installing packages...
       - export PUPPETEER_DOWNLOAD_HOST=https://npm.taobao.org/mirrors
-      - npm install && npm install -g @angular/cli
+      - npm install && npm install -g @angular/cli@13
   build:
     commands:
       - echo Build started on `date`
-      - ng  -v
+      - ng version
       #- npm run lint
       #- npm run test:ci
       - npm run build$ENV
