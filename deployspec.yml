@@ -13,3 +13,7 @@ phases:
   post_build:
     commands:
       - echo Deployment completed on `date`
+  artifacts:
+    files:
+      - deployspec.yml
+      - dist/**/*
