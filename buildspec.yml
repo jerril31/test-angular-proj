@@ -18,11 +18,11 @@ phases:
            
   post_build:
     commands:
-      - echo Copying files to S3 Bucket
-      - ls -l
-      - cd  ./dist/pdf-pw-remover
-      #copy dist folder to SPA  S3 Bucket
-      - aws s3 sync ./ s3://$CODE_ARTIFACT_BUCKET --delete
+      # - echo Copying files to S3 Bucket
+      # - ls -l
+      # - cd  ./dist/pdf-pw-remover
+      # #copy dist folder to SPA  S3 Bucket
+      # - aws s3 sync ./ s3://$CODE_ARTIFACT_BUCKET --delete
       - echo Build completed on `date`
 artifacts:
   files:
